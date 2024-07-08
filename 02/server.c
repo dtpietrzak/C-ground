@@ -3,6 +3,7 @@
 #include <string.h>
 #include <uv.h>
 
+#define PORT 7777
 #define MAX_HEADERS 10  // Adjust this based on your expected number of headers
 
 typedef struct {
@@ -168,9 +169,9 @@ int main() {
   uv_tcp_init(loop, &server);
 
   struct sockaddr_in bind_addr;
-  uv_ip4_addr("127.0.0.1", 7777, &bind_addr);
-
+  uv_ip4_addr("127.0.0.1", PORT, &bind_addr);
   uv_tcp_bind(&server, (const struct sockaddr *)&bind_addr, 0);
+
   int r = uv_listen((uv_stream_t *)&server, SOMAXCONN, on_connection);
   if (r) {
     fprintf(stderr, "Listen error %s\n", uv_strerror(r));
