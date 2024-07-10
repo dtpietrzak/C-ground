@@ -1,31 +1,16 @@
-#ifndef HTTP_SERVER_H
-#define HTTP_SERVER_H
+#ifndef SERVER_H
+#define SERVER_H
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <uv.h>
 
-#include "server.h"
+#include "distributor.h"
 
 #define PORT 7777
-#define MAX_REQ_METHOD_SIZE 16
-#define MAX_REQ_PATH_SIZE 256
-#define MAX_REQ_HEADERS 12
-#define MAX_REQ_HEADER_SIZE 256
-#define MAX_REQ_BODY_SIZE 1024
 
-typedef struct {
-  char method[MAX_REQ_METHOD_SIZE];
-  char path[MAX_REQ_PATH_SIZE];
-  char headers[MAX_REQ_HEADERS][MAX_REQ_HEADER_SIZE];
-  int num_headers;
-  char body[MAX_REQ_BODY_SIZE];
-} HttpRequest;
-
-typedef const char *(*RequestHandler)(const HttpRequest *);
-
-char *create_http_header(int status_code, const char *content_type,
+char *create_http_header(char *status_code, const char *content_type,
                          int content_length);
 
 void parse_http_request(const char *request_str, HttpRequest *request);
@@ -40,4 +25,4 @@ void on_connection(uv_stream_t *server, int status);
 
 int start_server();
 
-#endif  // HTTP_SERVER_H
+#endif  // SERVER_H

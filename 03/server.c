@@ -1,24 +1,12 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <uv.h>
+#include "server.h"
 
 #define PORT 7777
-#define MAX_REQ_METHOD_SIZE 16
-#define MAX_REQ_PATH_SIZE 256
-#define MAX_REQ_HEADERS 12
-#define MAX_REQ_HEADER_SIZE 256
-#define MAX_REQ_BODY_SIZE 1024
+#define MAX_REQ_SIZE 1024
+#define MAX_RES_SIZE 2048
 
-typedef struct {
-  char method[MAX_REQ_METHOD_SIZE];
-  char path[MAX_REQ_PATH_SIZE];
-  char headers[MAX_REQ_HEADERS][MAX_REQ_HEADER_SIZE];
-  int num_headers;
-  char body[MAX_REQ_BODY_SIZE];
-} HttpRequest;
+typedef char *(*RequestHandler)(HttpRequest *);
 
-char *create_http_header(int status_code, const char *content_type,
+char *create_http_header(char *status_code, const char *content_type,
                          int content_length) {
   // Allocate memory for the response
   char *response = (char *)malloc(1024 * sizeof(char));
@@ -29,8 +17,7 @@ char *create_http_header(int status_code, const char *content_type,
   response[0] = '\0';  // Ensure the string is empty initially
 
   // Format HTTP status line
-  sprintf(response, "HTTP/1.1 %d %s\r\n", status_code,
-          status_code == 200 ? "OK" : "Unknown Status");
+  sprintf(response, "HTTP/1.1 %s\r\n", status_code);
 
   // Append headers
   sprintf(response + strlen(response), "Content-Type: %s\r\n", content_type);
@@ -46,11 +33,47 @@ char *create_http_header(int status_code, const char *content_type,
 void parse_http_request(const char *request_str, HttpRequest *request) {
   // Initialize request struct
   memset(request, 0, sizeof(HttpRequest));
-
   // Parse method and path
   sscanf(request_str, "%s %s", request->method, request->path);
 
-  // Parse headers and body
+  // Check if there are query parameters in the path
+  char *query_start = strchr(request->path, '?');
+  if (query_start != NULL) {
+    *query_start = '\0';  // Separate path and query parameters
+    query_start++;        // Move past the '?'
+
+    // Parse query parameters
+    char *param_pair = strtok(query_start, "&");
+    int query_index = 0;
+    while (param_pair != NULL && query_index < MAX_REQ_QUERIES) {
+      char *equal_sign = strchr(param_pair, '=');
+      if (equal_sign != NULL) {
+        *equal_sign = '\0';
+        equal_sign++;
+
+        // key
+        strncpy(request->queries[query_index][0], param_pair,
+                MAX_REQ_QUERY_SIZE - 1);
+        request->queries[query_index][0][MAX_REQ_QUERY_SIZE - 1] = '\0';
+
+        // value
+        strncpy(request->queries[query_index][1], equal_sign,
+                MAX_REQ_QUERY_SIZE - 1);
+        request->queries[query_index][1][MAX_REQ_QUERY_SIZE - 1] = '\0';
+      } else {
+        // No '=' found, treat as key with empty value
+        strncpy(request->queries[query_index][0], param_pair,
+                MAX_REQ_QUERY_SIZE - 1);
+        request->queries[query_index][0][MAX_REQ_QUERY_SIZE - 1] = '\0';
+        request->queries[query_index][1][0] = '\0';  // Empty value
+      }
+      query_index++;
+      param_pair = strtok(NULL, "&");
+    }
+    request->num_queries = query_index;
+  }
+
+  // Parse headers
   const char *body_start = strstr(request_str, "\r\n\r\n");
   if (body_start != NULL) {
     // Copy headers
@@ -82,16 +105,37 @@ void parse_http_request(const char *request_str, HttpRequest *request) {
   }
 }
 
+void free_http_request(HttpRequest *request) {
+  free(request->method);
+  free(request->path);
+  free(request->headers);
+  free(request->body);
+}
+
 const char *process_request(const char *request_str) {
+  if (strlen(request_str) > MAX_REQ_SIZE) {
+    printf("Request too large!");
+    return NULL;
+  }
+
   HttpRequest request;
+
   parse_http_request(request_str, &request);
 
-  char message[512];
+  char message[MAX_RES_SIZE];
   memset(message, 0, sizeof(message));
-  sprintf(message, "{\"path\": \"%s\", \"body\": \"%s\"}", request.path,
-          request.body);
+  char *response = handle_request(&request);
 
-  int status_code = 200;
+  sprintf(message, "{\"path\": \"%s\", \"body\": \"%s\"}", request.path,
+          response);
+
+  char *status_code = "200 OK";
+  if (!strcmp(response, "404")) {
+    status_code = "404 Not Found";
+  }
+  if (!strcmp(response, "400")) {
+    status_code = "400 Bad Request";
+  }
   const char *content_type = "application/json";
   int content_length = strlen(message);
 
@@ -110,12 +154,16 @@ const char *process_request(const char *request_str) {
 
 void on_alloc_buffer(uv_handle_t *handle, size_t suggested_size,
                      uv_buf_t *buf) {
-  *buf = uv_buf_init((char *)malloc(suggested_size), suggested_size);
+  buf->base = (char *)malloc(suggested_size);
+  buf->len = suggested_size;
+  if (buf->base) {
+    memset(buf->base, 0, suggested_size);  // Zero out the buffer
+  }
 }
 
 void on_read(uv_stream_t *client_stream, ssize_t nread, const uv_buf_t *buf) {
   if (nread > 0) {
-    printf("Request:\n%.*s\n\n", (int)nread, buf->base);
+    printf("Request:\n%s\n\n", buf->base);
 
     // Process the received data
     const char *processed_data = process_request(buf->base);
