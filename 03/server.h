@@ -7,8 +7,7 @@
 #include <uv.h>
 
 #include "distributor.h"
-
-#define PORT 7777
+#include "utils/utils.h"
 
 char *create_http_header(char *status_code, const char *content_type,
                          int content_length);
@@ -23,6 +22,6 @@ void on_read(uv_stream_t *client_stream, ssize_t nread, const uv_buf_t *buf);
 
 void on_connection(uv_stream_t *server, int status);
 
-int start_server();
+int start_server(int port);
 
 #endif  // SERVER_H

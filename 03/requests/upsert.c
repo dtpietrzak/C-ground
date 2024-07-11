@@ -1,6 +1,5 @@
 #include "upsert.h"
 
-#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -15,64 +14,6 @@
 #endif
 
 #define MAX_PATH_LENGTH 1024
-
-// List of invalid characters for file names
-const char* invalid_chars = "\\/:*?\"<>|";
-
-// Function to check if a string contains any invalid characters
-bool contains_invalid_chars(const char* str) {
-  for (const char* p = str; *p != '\0'; p++) {
-    if (strchr(invalid_chars, *p) != NULL) {
-      return true;
-    }
-  }
-  return false;
-}
-
-int make_directory(const char* path) {
-  char* dir_copy = strdup(path);
-  char* last_slash = strrchr(dir_copy, '/');
-  if (last_slash != NULL) {
-    *last_slash = '\0';
-    make_directory(dir_copy);
-    free(dir_copy);
-  }
-
-  int status = mkdir(path, 0777);
-  if (status == -1) {
-    if (errno == EEXIST) {
-      // Directory already exists
-      return 0;
-    } else {
-      // Failed to create directory
-      perror("Failed to create directory");
-      return -1;
-    }
-  }
-  return 0;
-}
-
-void save_string_to_file(const char* data_string,
-                         const char* relative_file_path) {
-  // Create directory if it doesn't exist
-  char path_copy[strlen(relative_file_path) + 1];
-  strcpy(path_copy, relative_file_path);
-#ifdef _WIN32
-  char* dir =
-      path_copy;  // Windows version of dirname modifies the string itself
-#else
-  char* dir = dirname(path_copy);  // POSIX version of dirname
-#endif
-  make_directory(dir);
-
-  FILE* file = fopen(relative_file_path, "w");
-  if (file == NULL) {
-    perror("Failed to open file");
-    return;
-  }
-  fprintf(file, "%s", data_string);
-  fclose(file);
-}
 
 char* handle_request_insert(HttpRequest* http_request) {
   char *key = NULL, *db = NULL;
@@ -99,13 +40,29 @@ char* handle_request_insert(HttpRequest* http_request) {
 
   char relative_path[MAX_PATH_LENGTH];
 #ifdef _WIN32
-  snprintf(relative_path, sizeof(relative_path), "dbs\\%s\\%s.txt", db,
+  snprintf(relative_path, sizeof(relative_path), "dbs\\%s\\%s", db,
            key);  // Windows uses backslashes
 #else
-  snprintf(relative_path, sizeof(relative_path), "./dbs/%s/%s.txt", db,
+  snprintf(relative_path, sizeof(relative_path), "./dbs/%s/%s", db,
            key);  // Unix-like systems use forward slashes
 #endif
 
-  save_string_to_file(http_request->body, relative_path);
-  return http_request->body;
+  // -1 error
+  // 0 had to create directory
+  // 1 directory already existed
+  int status = save_string_to_file(http_request->body, relative_path);
+  switch (status) {
+    case -1:
+      return "500";
+      break;
+    case 0:
+      return "201";
+      break;
+    case 1:
+      return "204";
+      break;
+    default:
+      return "500";
+      break;
+  }
 }

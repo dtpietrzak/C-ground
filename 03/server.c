@@ -1,8 +1,10 @@
 #include "server.h"
 
-#define PORT 7777
+#include "global.c"
+
 #define MAX_REQ_SIZE 1024
 #define MAX_RES_SIZE 2048
+#define AUTH_LENGTH 128
 
 typedef char *(*RequestHandler)(HttpRequest *);
 
@@ -112,10 +114,92 @@ void free_http_request(HttpRequest *request) {
   free(request->body);
 }
 
+char *auth_error(const char *error_message) {
+  char message[MAX_RES_SIZE];
+  memset(message, 0, sizeof(message));
+  sprintf(message, "{\"status\": \"%d\", \"reason\": \"%s\"}", 401,
+          error_message);
+  char *status_code = "401 Unauthorized";
+  const char *content_type = "application/json";
+  int content_length = strlen(message);
+
+  char *http_response =
+      create_http_header(status_code, content_type, content_length);
+  if (http_response == NULL) {
+    return NULL;
+  }
+
+  http_response =
+      realloc(http_response, strlen(http_response) + strlen(message) + 1);
+  strcat(http_response, message);
+
+  return http_response;
+}
+
+char *validate_auth_header(const char *http_request) {
+  const char *auth_start = strstr(http_request, "Authorization: ");
+  if (auth_start == NULL) {
+    return auth_error("Authorization header not found");
+  }
+
+  auth_start += strlen("Authorization: ");
+  const char *auth_end = strchr(auth_start, '\n');
+  if (auth_end == NULL) {
+    auth_end = strchr(auth_start, '\r');  // Handle different line endings
+  }
+  if (auth_end == NULL) {
+    return auth_error("End of line not found");
+  }
+
+  // Calculate length of auth header
+  size_t auth_len = auth_end - auth_start;
+
+  // Allocate memory for auth header + null terminator
+  char *auth_header = (char *)malloc(auth_len + 1);
+  if (auth_header == NULL) {
+    free(auth_header);
+    return auth_error("Memory allocation failed");
+  }
+
+  // Copy auth header and null terminate
+  strncpy(auth_header, auth_start, auth_len);
+  auth_header[auth_len] = '\0';
+
+  // Remove carriage return if present
+  if (auth_header[auth_len - 1] == '\r') {
+    auth_header[auth_len - 1] = '\0';
+    auth_len--;
+  }
+
+  if (auth_header == NULL) {
+    free(auth_header);
+    return auth_error("Authorization header not found or invalid format");
+  }
+
+  if (auth_len != AUTH_LENGTH) {
+    free(auth_header);
+    return auth_error("Invalid authentication header length");
+  }
+
+  if (strcmp(auth_header, global_auth)) {
+    free(auth_header);
+    return auth_error("Invalid authentication");
+  }
+
+  free(auth_header);
+
+  return NULL;
+}
+
 const char *process_request(const char *request_str) {
   if (strlen(request_str) > MAX_REQ_SIZE) {
     printf("Request too large!");
     return NULL;
+  }
+
+  char *bad_auth_response = validate_auth_header(request_str);
+  if (bad_auth_response != NULL) {
+    return bad_auth_response;
   }
 
   HttpRequest request;
@@ -126,16 +210,23 @@ const char *process_request(const char *request_str) {
   memset(message, 0, sizeof(message));
   char *response = handle_request(&request);
 
-  sprintf(message, "{\"path\": \"%s\", \"body\": \"%s\"}", request.path,
-          response);
-
   char *status_code = "200 OK";
-  if (!strcmp(response, "404")) {
+  if (!strcmp(response, "201")) {
+    status_code = "201 Created";
+    sprintf(message, "{\"status\": \"%s\"}", response);
+  } else if (!strcmp(response, "204")) {
+    status_code = "204 No Content";
+    sprintf(message, "{\"status\": \"%s\"}", response);
+  } else if (!strcmp(response, "404")) {
     status_code = "404 Not Found";
-  }
-  if (!strcmp(response, "400")) {
+    sprintf(message, "{\"status\": \"%s\"}", response);
+  } else if (!strcmp(response, "400")) {
     status_code = "400 Bad Request";
+    sprintf(message, "{\"status\": \"%s\"}", response);
+  } else {
+    sprintf(message, "{\"status\": \"200\", \"body\": \"%s\"}", response);
   }
+
   const char *content_type = "application/json";
   int content_length = strlen(message);
 
@@ -208,6 +299,29 @@ void on_connection(uv_stream_t *server, int status) {
 
   uv_tcp_init(uv_default_loop(), client);
   if (uv_accept(server, (uv_stream_t *)client) == 0) {
+    struct sockaddr_storage peername;
+    int namelen = sizeof(peername);
+
+    if (uv_tcp_getpeername(client, (struct sockaddr *)&peername, &namelen) ==
+        0) {
+      char ip[17] = {'\0'};
+      if (peername.ss_family == AF_INET) {
+        uv_ip4_name((struct sockaddr_in *)&peername, ip, 16);
+      } else if (peername.ss_family == AF_INET6) {
+        uv_ip6_name((struct sockaddr_in6 *)&peername, ip, 16);
+      }
+
+      if (strcmp(global_ip, ip)) {
+        printf("Client attempted illegal connection from IP: %s\n", ip);
+        uv_close((uv_handle_t *)client, NULL);
+        return;
+      }
+    } else {
+      fprintf(stderr, "Failed to get peer name\n");
+      uv_close((uv_handle_t *)client, NULL);
+      return;
+    }
+
     printf("\n\nAccepted connection!\n");
     uv_read_start((uv_stream_t *)client, on_alloc_buffer, on_read);
   } else {
@@ -215,14 +329,14 @@ void on_connection(uv_stream_t *server, int status) {
   }
 }
 
-int start_server() {
+int start_server(int port) {
   uv_tcp_t server;
   uv_loop_t *loop = uv_default_loop();
 
   uv_tcp_init(loop, &server);
 
   struct sockaddr_in bind_addr;
-  uv_ip4_addr("127.0.0.1", PORT, &bind_addr);
+  uv_ip4_addr("127.0.0.1", port, &bind_addr);
   uv_tcp_bind(&server, (const struct sockaddr *)&bind_addr, 0);
 
   int r = uv_listen((uv_stream_t *)&server, SOMAXCONN, on_connection);
@@ -231,7 +345,7 @@ int start_server() {
     return 1;
   }
 
-  printf("Listening on port %d\n", PORT);
+  printf("Listening on port %d\n", port);
   uv_run(loop, UV_RUN_DEFAULT);
 
   return 0;
