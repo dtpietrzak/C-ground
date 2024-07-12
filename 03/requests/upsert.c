@@ -1,50 +1,17 @@
 #include "upsert.h"
 
-#include <stdbool.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-#ifdef _WIN32
-#include <direct.h>  // For Windows mkdir
-#define mkdir(directory, mode) _mkdir(directory)
-#else
-#include <libgen.h>    // For dirname
-#include <sys/stat.h>  // For mkdir
-#endif
-
 #define MAX_PATH_LENGTH 1024
 
 char* handle_request_insert(HttpRequest* http_request) {
-  char *key = NULL, *db = NULL;
-  for (int i = 0; i < http_request->num_queries; i++) {
-    if (!strcmp(http_request->queries[i][0], "key")) {
-      key = http_request->queries[i][1];
-    }
-    if (!strcmp(http_request->queries[i][0], "db")) {
-      db = http_request->queries[i][1];
-    }
-  }
-  if (key == NULL) {
-    return "400";
-  }
-  if (contains_invalid_chars(key)) {
-    return "400";
-  }
-  if (db == NULL) {
-    return "400";
-  }
-  if (contains_invalid_chars(db)) {
-    return "400";
-  }
+  QueryParams queries = validate_queries(http_request);
 
   char relative_path[MAX_PATH_LENGTH];
 #ifdef _WIN32
-  snprintf(relative_path, sizeof(relative_path), "dbs\\%s\\%s", db,
-           key);  // Windows uses backslashes
+  snprintf(relative_path, sizeof(relative_path), "dbs\\%s\\%s", queries.db,
+           queries.key);  // Windows uses backslashes
 #else
-  snprintf(relative_path, sizeof(relative_path), "./dbs/%s/%s", db,
-           key);  // Unix-like systems use forward slashes
+  snprintf(relative_path, sizeof(relative_path), "./dbs/%s/%s", queries.db,
+           queries.key);  // Unix-like systems use forward slashes
 #endif
 
   // -1 error

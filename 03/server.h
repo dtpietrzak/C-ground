@@ -7,12 +7,11 @@
 #include <uv.h>
 
 #include "distributor.h"
+#include "http.h"
 #include "utils/utils.h"
 
-char *create_http_header(char *status_code, const char *content_type,
-                         int content_length);
-
-void parse_http_request(const char *request_str, HttpRequest *request);
+#define MAX_RES_SIZE 65535
+#define MAX_REQ_SIZE 65535
 
 const char *process_request(const char *request_str);
 

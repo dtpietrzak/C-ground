@@ -1,12 +1,8 @@
+#include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#include "../http.h"
-#include "../utils/file_operations.h"
-#include "../utils/requests.h"
-#include "../utils/utils.h"
 
 #ifdef _WIN32
 #include <direct.h>  // For Windows mkdir
@@ -16,4 +12,8 @@
 #include <sys/stat.h>  // For mkdir
 #endif
 
-char *handle_request_insert(HttpRequest *http_request);
+#include "../http.h"
+#include "../utils/requests.h"
+#include "../utils/utils.h"
+
+char *handle_request_delete(HttpRequest *http_request);

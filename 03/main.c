@@ -3,24 +3,14 @@
 #include <string.h>
 #include <uv.h>
 
-#include "global.c"
 #include "server.h"
+#include "utils/settings.h"
 #include "utils/utils.h"
 
 int main() {
-  char* settings = read_file_to_string("settings.conf");
-  int16_t port;
+  load_settings();
 
-  if (settings == NULL) {
-    settings = "port:7777\nauth:abc123\nip:127.0.0.1\n";
-    save_string_to_file(settings, "settings.conf");
-  }
-
-  sscanf(settings, "port:%hu\nauth:%128s\nip:%s", &port, global_auth, global_ip);
-
-  int result = start_server(port);
-
-  free(settings);
+  int result = start_server(global_setting_port);
 
   if (result != 0) {
     fprintf(stderr, "Failed to start the server\n");
