@@ -1,5 +1,28 @@
 #include "file_operations.h"
 
+#define MAX_PATH_LENGTH 1024
+
+char* derive_path(char* category, char* location, char* item) {
+  // Calculate the length of the final path
+  size_t length = strlen(category) + strlen(location) + strlen(item) + 5;
+
+  // Allocate memory for the resulting path
+  char* relative_path = malloc(length);
+  if (relative_path == NULL) {
+    return NULL;  // Allocation failed
+  }
+
+#ifdef _WIN32
+  snprintf(relative_path, length, "%s\\%s\\%s", category, location,
+           item);  // Windows uses backslashes
+#else
+  snprintf(relative_path, length, "./%s/%s/%s", category, location,
+           item);  // Unix-like systems use forward slashes
+#endif
+
+  return relative_path;
+}
+
 int make_directory(const char* path) {
   char* dir_copy = strdup(path);
   char* last_slash = strrchr(dir_copy, '/');

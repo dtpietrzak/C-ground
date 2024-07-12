@@ -1,5 +1,8 @@
-#include "query.h"
+#include "delete.h"
 
-#define MAX_PATH_LENGTH 1024
+char* handle_request_delete(HttpRequest* http_request) {
+  QueryParams queries = validate_queries(http_request);
+  // char* relative_path = derive_path("dbs", "test", "tost");
 
-char* handle_request_delete(HttpRequest* http_request) { return "404"; }
+  return "404";
+}

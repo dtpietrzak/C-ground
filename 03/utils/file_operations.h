@@ -18,6 +18,7 @@
 #include <unistd.h>
 #endif
 
+char* derive_path(char* category, char* location, char* item);
 int make_directory(const char* path);
 char* read_file_to_string(const char* relative_file_path);
 int save_string_to_file(const char* data_string,
