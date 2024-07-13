@@ -17,4 +17,5 @@
 #include <sys/stat.h>  // For mkdir
 #endif
 
-char *handle_request_delete(HttpRequest *http_request);
+void handle_request_delete(HttpRequest* http_request,
+                           HttpResponse* http_response);

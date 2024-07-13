@@ -1,32 +1,6 @@
 #include "http.h"
 
-char *create_http_header(char *status_code, const char *content_type,
-                         int content_length) {
-  char *http_header = (char *)malloc(MAX_RES_SIZE);
-  if (http_header == NULL) {
-    fprintf(stderr, "Memory allocation error\n");
-    return NULL;
-  }
-  http_header[0] = '\0';  // Ensure the string is empty initially
-
-  // Format HTTP status line
-  snprintf(http_header, MAX_RES_SIZE, "HTTP/1.1 %s\r\n", status_code);
-
-  // Append headers
-  snprintf(http_header + strlen(http_header), MAX_RES_SIZE,
-           "Content-Type: %s\r\n", content_type);
-  snprintf(http_header + strlen(http_header), MAX_RES_SIZE,
-           "Content-Length: %d\r\n", content_length);
-
-  // End of headers
-  strcat(http_header, "\r\n");
-
-  return http_header;
-}
-
 void parse_http_request(const char *request_str, HttpRequest *request) {
-  // Initialize request struct
-  memset(request, 0, sizeof(HttpRequest));
   // Parse method and path
   sscanf(request_str, "%s %s", request->method, request->path);
 
@@ -87,59 +61,70 @@ void parse_http_request(const char *request_str, HttpRequest *request) {
       }
     }
 
-    // Copy body
-    size_t body_length = strlen(body_start + 4);
-    if (body_length < sizeof(request->body)) {
-      strcpy(request->body, body_start + 4);  // Move past "\r\n\r\n"
-    } else {
-      strncpy(request->body, body_start + 4, sizeof(request->body) - 1);
-      request->body[sizeof(request->body) - 1] =
-          '\0';  // Ensure null termination
-    }
+    s_compile(&request->body, "%s", body_start + 4);
+
+    printf("test: %s", request->body.value);
   }
 }
 
-void free_http_request(HttpRequest *request) {
-  free(request->method);
-  free(request->path);
-  free(request->queries);
-  free(request->headers);
-  free(request->body);
-}
+void compile_http_response(HttpResponse *http_response, SString *response_str) {
+  // start status_code
+  SString status_code;
+  s_init(&status_code, "", 36);
 
-char *auth_error(const char *error_message) {
-  char message[MAX_RES_SIZE];
-  memset(message, 0, sizeof(message));
-  snprintf(message, MAX_RES_SIZE, "{\"status\": \"%d\", \"reason\": \"%s\"}",
-           401, error_message);
-  char *status_code = "401 Unauthorized";
-  const char *content_type = "application/json";
-  int content_length = strlen(message);
-
-  char *http_header =
-      create_http_header(status_code, content_type, content_length);
-  if (http_header == NULL) {
-    free(http_header);
-    return NULL;
+  switch (http_response->status) {
+    case 200:
+      s_set(&status_code, "200 OK");
+      break;
+    case 201:
+      s_set(&status_code, "201 Created");
+      break;
+    case 204:
+      s_set(&status_code, "204 No Content");
+      break;
+    case 400:
+      s_set(&status_code, "400 Bad Request");
+      break;
+    case 401:
+      s_set(&status_code, "401 Unauthorized");
+      break;
+    case 404:
+      s_set(&status_code, "404 Not Found");
+      break;
+    default:
+      s_set(&status_code, "500 Internal Server Error");
+      break;
   }
 
-  char *http_response =
-      (char *)malloc(strlen(http_header) + strlen(message) + 1);
-  if (http_response == NULL) {
-    free(http_header);
-    return NULL;
-  }
+  SString response_content_str;
+  s_init(&response_content_str, "", MAX_RES_SIZE);
+  s_compile(&response_content_str, "{\"status\": \"%d\", \"body\": \"%s\"}",
+            http_response->status, http_response->body.value);
 
-  strcat(http_response, http_header);
-  strcat(http_response, message);
-
-  return http_response;
+  s_compile(response_str,
+            "HTTP/1.1 %s\r\n"
+            "Content-Type: application/json\r\n"
+            "Content-Length: %d\r\n"
+            "\r\n"
+            "%s",
+            status_code.value, response_content_str.length,
+            response_content_str.value);
 }
 
-char *validate_auth_header(const char *http_request) {
-  const char *auth_start = strstr(http_request, "Authorization: ");
+void free_http_request(HttpRequest *http_request) {}
+
+void free_http_response(HttpResponse *http_response) {
+  http_response->status = 0;
+  s_free(&http_response->body);
+}
+
+void validate_auth_header(const char *request_str,
+                          HttpResponse *http_response) {
+  const char *auth_start = strstr(request_str, "Authorization: ");
   if (auth_start == NULL) {
-    return auth_error("Authorization header not found");
+    http_response->status = 401;
+    s_set(&http_response->body, "Authorization header not found");
+    return;
   }
 
   auth_start += strlen("Authorization: ");
@@ -148,7 +133,9 @@ char *validate_auth_header(const char *http_request) {
     auth_end = strchr(auth_start, '\r');  // Handle different line endings
   }
   if (auth_end == NULL) {
-    return auth_error("End of line not found");
+    http_response->status = 401;
+    s_set(&http_response->body, "Auth header end of line not found");
+    return;
   }
 
   // Calculate length of auth header
@@ -158,7 +145,9 @@ char *validate_auth_header(const char *http_request) {
   char *auth_header = (char *)malloc(auth_len + 1);
   if (auth_header == NULL) {
     free(auth_header);
-    return auth_error("Memory allocation failed");
+    http_response->status = 401;
+    s_set(&http_response->body, "Memory allocation failed");
+    return;
   }
 
   // Copy auth header and null terminate
@@ -172,21 +161,16 @@ char *validate_auth_header(const char *http_request) {
   }
 
   if (auth_header == NULL) {
-    free(auth_header);
-    return auth_error("Authorization header not found or invalid format");
-  }
-
-  if (auth_len != AUTH_LENGTH) {
-    free(auth_header);
-    return auth_error("Invalid authentication header length");
-  }
-
-  if (strcmp(auth_header, global_setting_auth)) {
-    free(auth_header);
-    return auth_error("Invalid authentication");
+    http_response->status = 401;
+    s_set(&http_response->body,
+          "Authorization header not found or invalid format");
+  } else if (auth_len != AUTH_LENGTH) {
+    http_response->status = 401;
+    s_set(&http_response->body, "Invalid authentication header length");
+  } else if (strcmp(auth_header, global_setting_auth)) {
+    http_response->status = 401;
+    s_set(&http_response->body, "Invalid authentication");
   }
 
   free(auth_header);
-
-  return NULL;
 }

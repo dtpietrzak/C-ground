@@ -5,6 +5,7 @@
 
 #include "server.h"
 #include "utils/settings.h"
+#include "utils/sstring.h"
 #include "utils/utils.h"
 
 int main() {

@@ -2,64 +2,36 @@
 
 #include "global.c"
 
-const char *process_request(const char *request_str) {
+void process_request(const char *request_str, SString *response_str) {
+  // start response
+  HttpResponse http_response;
+  s_init(&http_response.body, "", MAX_RES_SIZE);
+
   if (strlen(request_str) > MAX_REQ_SIZE) {
-    printf("Request too large!");
-    return NULL;
-  }
-
-  char *bad_auth_response = validate_auth_header(request_str);
-  if (bad_auth_response != NULL) {
-    return bad_auth_response;
-  }
-
-  HttpRequest request;
-
-  parse_http_request(request_str, &request);
-
-  char message[MAX_RES_SIZE];
-  memset(message, 0, sizeof(message));
-  char *response = handle_request(&request);
-
-  char *status_code = "200 OK";
-  if (!strcmp(response, "201")) {
-    status_code = "201 Created";
-    snprintf(message, MAX_RES_SIZE, "{\"status\": \"%s\"}", response);
-  } else if (!strcmp(response, "204")) {
-    status_code = "204 No Content";
-    snprintf(message, MAX_RES_SIZE, "{\"status\": \"%s\"}", response);
-  } else if (!strcmp(response, "404")) {
-    status_code = "404 Not Found";
-    snprintf(message, MAX_RES_SIZE, "{\"status\": \"%s\"}", response);
-  } else if (!strcmp(response, "400")) {
-    status_code = "400 Bad Request";
-    snprintf(message, MAX_RES_SIZE, "{\"status\": \"%s\"}", response);
+    http_response.status = 400;
+    s_set(&http_response.body, "Request too large");
   } else {
-    snprintf(message, MAX_RES_SIZE, "{\"status\": \"200\", \"body\": \"%s\"}",
-             response);
+    validate_auth_header(request_str, &http_response);
+    if (http_response.status != 401) {
+      // start request
+      HttpRequest http_request;
+      // Initialize request struct
+      memset(&http_request, 0, sizeof(HttpRequest));
+      s_init(&http_request.body, "", MAX_REQ_BODY_SIZE);
+      // parse request string into request struct
+      parse_http_request(request_str, &http_request);
+      // handle the request
+      handle_request(&http_request, &http_response);
+      free_http_request(&http_request);
+      // end request
+    }
   }
 
-  const char *content_type = "application/json";
-  int content_length = strlen(message);
+  // compile http_request into the request string
+  compile_http_response(&http_response, response_str);
 
-  char *http_header =
-      create_http_header(status_code, content_type, content_length);
-  if (http_header == NULL) {
-    free(http_header);
-    return NULL;
-  }
-
-  char *http_response =
-      (char *)malloc(strlen(http_header) + strlen(message) + 1);
-  if (http_response == NULL) {
-    free(http_header);
-    return NULL;
-  }
-
-  strcat(http_response, http_header);
-  strcat(http_response, message);
-
-  return http_response;
+  free_http_response(&http_response);
+  // end response
 }
 
 void on_alloc_buffer(uv_handle_t *handle, size_t suggested_size,
@@ -75,23 +47,26 @@ void on_read(uv_stream_t *client_stream, ssize_t nread, const uv_buf_t *buf) {
   if (nread > 0) {
     printf("Request:\n%s\n\n", buf->base);
 
+    // start response_body
+    SString response_str;
+    s_init(&response_str, "", MAX_RES_SIZE);
+
     // Process the received data
-    const char *processed_data = process_request(buf->base);
+    process_request(buf->base, &response_str);
 
     // Free buffer allocated by on_alloc_buffer
     if (buf->base) {
       free(buf->base);
     }
 
-    if (processed_data != NULL) {
-      printf("Response:\n%s\n\n\n", processed_data);
+    if (response_str.value != NULL) {
+      printf("Response:\n%s\n\n\n", response_str.value);
 
       uv_write_t write_req;
-      uv_buf_t write_buf =
-          uv_buf_init((char *)processed_data, strlen(processed_data));
+      uv_buf_t write_buf = uv_buf_init(response_str.value, response_str.length);
       uv_write(&write_req, client_stream, &write_buf, 1, NULL);
 
-      free((void *)processed_data);
+      s_free(&response_str);
     } else {
       printf("Failed to process request.\n");
       uv_close((uv_handle_t *)client_stream, NULL);

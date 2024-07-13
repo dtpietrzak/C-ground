@@ -6,14 +6,15 @@
 #include <string.h>
 
 #include "global.c"
+#include "utils/sstring.h"
 
-#define MAX_REQ_METHOD_SIZE 16
-#define MAX_REQ_PATH_SIZE 256
+#define MAX_REQ_METHOD_SIZE 8
+#define MAX_REQ_PATH_SIZE 1024
 #define MAX_REQ_QUERIES 24
-#define MAX_REQ_QUERY_SIZE 256
-#define MAX_REQ_HEADERS 12
-#define MAX_REQ_HEADER_SIZE 256
-#define MAX_REQ_BODY_SIZE 1024
+#define MAX_REQ_QUERY_SIZE 512
+#define MAX_REQ_HEADERS 24
+#define MAX_REQ_HEADER_SIZE 512
+#define MAX_REQ_BODY_SIZE 39927
 
 #define MAX_RES_SIZE 65535
 #define MAX_REQ_SIZE 65535
@@ -27,14 +28,18 @@ typedef struct {
   int num_queries;
   char headers[MAX_REQ_HEADERS][MAX_REQ_HEADER_SIZE];
   int num_headers;
-  char body[MAX_REQ_BODY_SIZE];
+  SString body;
 } HttpRequest;
 
-char *create_http_header(char *status_code, const char *content_type,
-                         int content_length);
+typedef struct {
+  uint16_t status;
+  SString body;
+} HttpResponse;
+
+void validate_auth_header(const char *request_str, HttpResponse *http_response);
 void parse_http_request(const char *request_str, HttpRequest *request);
+void compile_http_response(HttpResponse *http_response, SString *response_str);
 void free_http_request(HttpRequest *request);
-char *auth_error(const char *error_message);
-char *validate_auth_header(const char *http_request);
+void free_http_response(HttpResponse *http_response);
 
 #endif  // HTTP_H

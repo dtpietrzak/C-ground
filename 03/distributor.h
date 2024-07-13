@@ -3,4 +3,4 @@
 
 #include "http.h"
 
-char *handle_request(HttpRequest *http_request);
+void handle_request(HttpRequest *http_request, HttpResponse *http_response);

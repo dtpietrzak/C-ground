@@ -17,4 +17,5 @@
 #include <sys/stat.h>  // For mkdir
 #endif
 
-char *handle_request_insert(HttpRequest *http_request);
+void handle_request_insert(HttpRequest* http_request,
+                           HttpResponse* http_response);

@@ -8,12 +8,13 @@
 
 #include "distributor.h"
 #include "http.h"
+#include "utils/sstring.h"
 #include "utils/utils.h"
 
 #define MAX_RES_SIZE 65535
 #define MAX_REQ_SIZE 65535
 
-const char *process_request(const char *request_str);
+void process_request(const char *request_str, SString *response_str);
 
 void on_alloc_buffer(uv_handle_t *handle, size_t suggested_size, uv_buf_t *buf);
 

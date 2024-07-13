@@ -1,28 +1,36 @@
 #include "distributor.h"
 
+#include "requests/delete.h"
 #include "requests/query.h"
 #include "requests/upsert.h"
-#include "requests/delete.h"
 
-char* handle_request(HttpRequest* http_request) {
+void handle_request(HttpRequest* http_request, HttpResponse* http_response) {
   if (!strcmp(http_request->path, "/query")) {
     if (!strcmp(http_request->method, "GET")) {
-      return handle_request_query(http_request);
+      handle_request_query(http_request, http_response);
     } else {
-      return "400";
+      http_response->status = 400;
+      s_set(&http_response->body,
+            "Invalid method. Requests to /query should be GET");
     }
   } else if (!strcmp(http_request->path, "/upsert")) {
     if (!strcmp(http_request->method, "POST")) {
-      return handle_request_insert(http_request);
+      handle_request_insert(http_request, http_response);
     } else {
-      return "400";
+      http_response->status = 400;
+      s_set(&http_response->body,
+            "Invalid method. Requests to /upsert should be POST");
     }
   } else if (!strcmp(http_request->path, "/delete")) {
     if (!strcmp(http_request->method, "DELETE")) {
-      return handle_request_delete(http_request);
+      handle_request_delete(http_request, http_response);
     } else {
-      return "400";
+      http_response->status = 400;
+      s_set(&http_response->body,
+            "Invalid method. Requests to /delete should be DELETE");
     }
   }
-  return "404";
+  // heads up, we still get here because we don't return earlier
+  // each if statement else's through
+  // so it should ever only end down one branch
 }
