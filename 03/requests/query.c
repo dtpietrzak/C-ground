@@ -10,7 +10,11 @@ void handle_request_query(HttpRequest* http_request,
   // Check if the file exists
   char* fileAccessIssue = check_file_access(relative_path, 1);
   if (fileAccessIssue != NULL) {
-    http_response->status = 500;
+    if (strcmp(fileAccessIssue, "Document does not exist") == 0) {
+      http_response->status = 404;
+    } else {
+      http_response->status = 500;
+    }
     s_set(&http_response->body, fileAccessIssue);
     return;
   }
@@ -18,7 +22,9 @@ void handle_request_query(HttpRequest* http_request,
   // Read file content into string
   char* file_content = read_file_to_string(relative_path);
   if (file_content == NULL) {
-    http_response->status = 404;
+    // 500 here even in the case of the file not existing
+    // because we're checking that above
+    http_response->status = 500;
     s_set(&http_response->body,
           "Failed to read data from the requested document");
     return;

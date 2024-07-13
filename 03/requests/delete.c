@@ -8,7 +8,12 @@ void handle_request_delete(HttpRequest* http_request,
   // Check if the file exists
   char* fileAccessIssue = check_file_access(relative_path, 1);
   if (fileAccessIssue != NULL) {
-    http_response->status = 500;
+    if (strcmp(fileAccessIssue, "Document does not exist") == 0) {
+      http_response->status = 404;
+    } else {
+      http_response->status = 500;
+    }
+
     s_set(&http_response->body, fileAccessIssue);
     return;
   }

@@ -141,7 +141,7 @@ char* check_file_access(char* path, int8_t level) {
     if (access(path, X_OK) == 0) {
       return NULL;
     } else {
-      return "File is not executable";
+      return "Document is not executable";
     }
   }
 
@@ -150,7 +150,7 @@ char* check_file_access(char* path, int8_t level) {
     if (access(path, W_OK) == 0) {
       return NULL;
     } else {
-      return "File is not writable";
+      return "Document is not writable";
     }
   }
 
@@ -159,28 +159,28 @@ char* check_file_access(char* path, int8_t level) {
     if (access(path, R_OK) == 0) {
       return NULL;
     } else {
-      return "File is not readable";
+      return "Document is not readable";
     }
   }
 
   // Check if the file exists
   if (access(path, F_OK) != 0) {
-    return "File does not exist";
+    return "Document does not exist";
   }
 
   // Check if the file is readable
   if (access(path, R_OK) != 0 && level >= 1) {
-    return "File is not readable";
+    return "Document is not readable";
   }
 
   // Check if the file is writable
   if (access(path, W_OK) != 0 && level >= 2) {
-    return "File is not writable";
+    return "Document is not writable";
   }
 
   // Check if the file is executable
   if (access(path, X_OK) != 0 && level >= 3) {
-    return "File is not executable";
+    return "Document is not executable";
   }
 
   return NULL;

@@ -26,11 +26,11 @@ void handle_request_insert(HttpRequest* http_request,
     }
     case 0:
       http_response->status = 201;
-      s_set(&http_response->body, "Record inserted successfully");
+      s_set(&http_response->body, "Document inserted successfully");
       break;
     case 1:
       http_response->status = 204;
-      s_set(&http_response->body, "Record updated successfully");
+      s_set(&http_response->body, "Document updated successfully");
       break;
     default: {
       // Check if the file exists
