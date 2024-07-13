@@ -62,8 +62,6 @@ void parse_http_request(const char *request_str, HttpRequest *request) {
     }
 
     s_compile(&request->body, "%s", body_start + 4);
-
-    printf("test: %s", request->body.value);
   }
 }
 
@@ -111,7 +109,13 @@ void compile_http_response(HttpResponse *http_response, SString *response_str) {
             response_content_str.value);
 }
 
-void free_http_request(HttpRequest *http_request) {}
+void free_http_request(HttpRequest *http_request) {
+  memset(&http_request->headers, 0, sizeof(http_request->headers));
+  memset(&http_request->method, 0, sizeof(http_request->method));
+  memset(&http_request->path, 0, sizeof(http_request->path));
+  memset(&http_request->queries, 0, sizeof(http_request->queries));
+  s_free(&http_request->body);
+}
 
 void free_http_response(HttpResponse *http_response) {
   http_response->status = 0;
