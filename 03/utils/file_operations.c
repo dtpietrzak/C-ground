@@ -126,3 +126,62 @@ int save_string_to_file(const char* data_string,
     return 0;
   }
 }
+
+// levels:
+// -3 = file only needs executable
+// -2 file only needs writable
+// -1 file only needs readable
+// 0 = file only needs to exist
+// 1 = file needs to exist and be readable
+// 2 = file needs to exist, be readable and writable
+// 3 = file needs to exist, be readable, writable and executable
+char* check_file_access(char* path, int8_t level) {
+  // Check if the file is executable
+  if (level == -3) {
+    if (access(path, X_OK) == 0) {
+      return NULL;
+    } else {
+      return "File is not executable";
+    }
+  }
+
+  // Check if the file is writable
+  if (level == -2) {
+    if (access(path, W_OK) == 0) {
+      return NULL;
+    } else {
+      return "File is not writable";
+    }
+  }
+
+  // Check if the file is readable
+  if (level == -1) {
+    if (access(path, R_OK) == 0) {
+      return NULL;
+    } else {
+      return "File is not readable";
+    }
+  }
+
+  // Check if the file exists
+  if (access(path, F_OK) != 0) {
+    return "File does not exist";
+  }
+
+  // Check if the file is readable
+  if (access(path, R_OK) != 0 && level >= 1) {
+    return "File is not readable";
+  }
+
+  // Check if the file is writable
+  if (access(path, W_OK) != 0 && level >= 2) {
+    return "File is not writable";
+  }
+
+  // Check if the file is executable
+  if (access(path, X_OK) != 0 && level >= 3) {
+    return "File is not executable";
+  }
+
+  return NULL;
+}
