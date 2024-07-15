@@ -6,6 +6,7 @@
 
 #include "../http.h"
 #include "../utils/file_operations.h"
+#include "../utils/parson.h"
 #include "../utils/requests.h"
 #include "../utils/utils.h"
 

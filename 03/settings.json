@@ -1,0 +1,6 @@
+{
+  "port": 7777,
+  "auth": "CHANGE_THIS_CHANGE_THIS_CHANGE_THIS_CHANGE_THIS_CHANGE_THIS",
+  "ip": "127.0.0.1",
+  "path": "./"
+}

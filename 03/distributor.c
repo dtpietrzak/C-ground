@@ -11,7 +11,7 @@ void handle_request(HttpRequest* http_request, HttpResponse* http_response) {
     } else {
       http_response->status = 400;
       s_set(&http_response->body,
-            "Invalid method. Requests to /query should be GET");
+            "\"Invalid method. Requests to /query should be GET\"");
     }
   } else if (!strcmp(http_request->path, "/upsert")) {
     if (!strcmp(http_request->method, "POST")) {
@@ -19,7 +19,7 @@ void handle_request(HttpRequest* http_request, HttpResponse* http_response) {
     } else {
       http_response->status = 400;
       s_set(&http_response->body,
-            "Invalid method. Requests to /upsert should be POST");
+            "\"Invalid method. Requests to /upsert should be POST\"");
     }
   } else if (!strcmp(http_request->path, "/delete")) {
     if (!strcmp(http_request->method, "DELETE")) {
@@ -27,7 +27,7 @@ void handle_request(HttpRequest* http_request, HttpResponse* http_response) {
     } else {
       http_response->status = 400;
       s_set(&http_response->body,
-            "Invalid method. Requests to /delete should be DELETE");
+            "\"Invalid method. Requests to /delete should be DELETE\"");
     }
   }
   // heads up, we still get here because we don't return earlier

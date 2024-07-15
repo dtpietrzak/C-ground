@@ -19,7 +19,7 @@
 #define MAX_RES_SIZE 65535
 #define MAX_REQ_SIZE 65535
 
-#define AUTH_LENGTH 128
+#define REQUIRED_AUTH_LENGTH 32
 
 typedef struct {
   char method[MAX_REQ_METHOD_SIZE];

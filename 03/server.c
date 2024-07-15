@@ -2,6 +2,35 @@
 
 #include "global.c"
 
+void debug_strcmp(const char *a, const char *b) {
+  int result = strcmp(a, b);
+  printf("a: \"%s\", b: \"%s\"\n", a, b);
+  printf("strcmp result: %d\n", result);
+
+  int i = 0;
+  while (a[i] != '\0' && b[i] != '\0') {
+    if (a[i] != b[i]) {
+      printf("Mismatch at index %d: a[%d] = '%c', b[%d] = '%c'\n", i, i, a[i],
+             i, b[i]);
+    }
+    i++;
+  }
+
+  // Check if one string is longer than the other
+  if (a[i] != '\0' || b[i] != '\0') {
+    printf("Strings have different lengths.\n");
+    if (a[i] != '\0') {
+      printf("Extra characters in 'a' starting at index %d: \"%s\"\n", i,
+             &a[i]);
+    } else {
+      printf("Extra characters in 'b' starting at index %d: \"%s\"\n", i,
+             &b[i]);
+    }
+  } else {
+    printf("Strings are of equal length.\n");
+  }
+}
+
 void process_request(const char *request_str, SString *response_str) {
   // start response
   HttpResponse http_response;
@@ -91,6 +120,8 @@ int validate_tcp_ip(uv_tcp_t *client) {
       uv_ip6_name((struct sockaddr_in6 *)&peername, ip, 16);
     }
 
+    debug_strcmp(global_setting_ip, ip);
+
     if (strcmp(global_setting_ip, ip) == 0) {
       return 0;
     } else {
@@ -138,11 +169,11 @@ int start_server(int port) {
 
   int r = uv_listen((uv_stream_t *)&server, SOMAXCONN, on_connection);
   if (r) {
-    fprintf(stderr, "Listen error %s\n", uv_strerror(r));
+    fprintf(stderr, "\nListen error %s\n", uv_strerror(r));
     return 1;
   }
 
-  printf("Listening on port %d\n", port);
+  printf("\nListening on port %d\n", port);
   uv_run(loop, UV_RUN_DEFAULT);
 
   return 0;

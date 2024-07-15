@@ -3,7 +3,10 @@
 #include <string.h>
 
 #include "../global.c"
-#include "utils.h"
 #include "file_operations.h"
+#include "parson.h"
+#include "utils.h"
 
-void load_settings();
+char* settings_file_path;
+int load_settings();
+void free_settings();

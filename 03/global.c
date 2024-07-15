@@ -1,3 +1,4 @@
-char global_setting_auth[129];
-char global_setting_ip[17];
+char *global_setting_auth;
+char *global_setting_ip;
 int16_t global_setting_port;
+char *global_setting_path;

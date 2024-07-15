@@ -1,10 +1,13 @@
 #include "file_operations.h"
 
+#include "../global.c"
+
 #define MAX_PATH_LENGTH 1024
 
 char* derive_path(char* category, char* location, char* item) {
   // Calculate the length of the final path
-  size_t length = strlen(category) + strlen(location) + strlen(item) + 5;
+  size_t length = strlen(global_setting_path) + strlen(category) +
+                  strlen(location) + strlen(item) + 8;
 
   // Allocate memory for the resulting path
   char* relative_path = malloc(length);
@@ -16,8 +19,8 @@ char* derive_path(char* category, char* location, char* item) {
   snprintf(relative_path, length, "%s\\%s\\%s", category, location,
            item);  // Windows uses backslashes
 #else
-  snprintf(relative_path, length, "./%s/%s/%s", category, location,
-           item);  // Unix-like systems use forward slashes
+  snprintf(relative_path, length, "%sdata/%s/%s/%s", global_setting_path,
+           category, location, item);  // Unix-like systems use forward slashes
 #endif
 
   return relative_path;
@@ -135,6 +138,9 @@ int save_string_to_file(const char* data_string,
 // 1 = file needs to exist and be readable
 // 2 = file needs to exist, be readable and writable
 // 3 = file needs to exist, be readable, writable and executable
+//
+// returns NULL if no issues
+//   else a string describing the issue
 char* check_file_access(char* path, int8_t level) {
   // Check if the file is executable
   if (level == -3) {

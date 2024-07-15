@@ -96,7 +96,7 @@ void compile_http_response(HttpResponse *http_response, SString *response_str) {
 
   SString response_content_str;
   s_init(&response_content_str, "", MAX_RES_SIZE);
-  s_compile(&response_content_str, "{\"status\": \"%d\", \"body\": \"%s\"}",
+  s_compile(&response_content_str, "{\"status\": \"%d\", \"body\": %s}",
             http_response->status, http_response->body.value);
 
   s_compile(response_str,
@@ -127,7 +127,7 @@ void validate_auth_header(const char *request_str,
   const char *auth_start = strstr(request_str, "Authorization: ");
   if (auth_start == NULL) {
     http_response->status = 401;
-    s_set(&http_response->body, "Authorization header not found");
+    s_set(&http_response->body, "\"Authorization header not found\"");
     return;
   }
 
@@ -138,7 +138,7 @@ void validate_auth_header(const char *request_str,
   }
   if (auth_end == NULL) {
     http_response->status = 401;
-    s_set(&http_response->body, "Auth header end of line not found");
+    s_set(&http_response->body, "\"Auth header end of line not found\"");
     return;
   }
 
@@ -150,7 +150,7 @@ void validate_auth_header(const char *request_str,
   if (auth_header == NULL) {
     free(auth_header);
     http_response->status = 401;
-    s_set(&http_response->body, "Memory allocation failed");
+    s_set(&http_response->body, "\"Memory allocation failed\"");
     return;
   }
 
@@ -167,13 +167,15 @@ void validate_auth_header(const char *request_str,
   if (auth_header == NULL) {
     http_response->status = 401;
     s_set(&http_response->body,
-          "Authorization header not found or invalid format");
-  } else if (auth_len != AUTH_LENGTH) {
-    http_response->status = 401;
-    s_set(&http_response->body, "Invalid authentication header length");
+          "\"Authorization header not found or invalid format\"");
   } else if (strcmp(auth_header, global_setting_auth)) {
     http_response->status = 401;
-    s_set(&http_response->body, "Invalid authentication");
+    s_set(&http_response->body, "\"Invalid authentication\"");
+  } else if (auth_len < REQUIRED_AUTH_LENGTH) {
+    http_response->status = 401;
+    s_set(&http_response->body,
+          "\"Invalid authentication header length, should be at least 32 "
+          "characters\"");
   }
 
   free(auth_header);
