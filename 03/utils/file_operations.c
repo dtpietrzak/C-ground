@@ -1,10 +1,8 @@
 #include "file_operations.h"
 
-#include "../global.c"
-
 #define MAX_PATH_LENGTH 1024
 
-char* derive_path(char* category, char* location, char* item) {
+char* derive_path_to_item(char* category, char* location, char* item) {
   // Calculate the length of the final path
   size_t length = strlen(global_setting_path) + strlen(category) +
                   strlen(location) + strlen(item) + 8;
@@ -12,7 +10,8 @@ char* derive_path(char* category, char* location, char* item) {
   // Allocate memory for the resulting path
   char* relative_path = malloc(length);
   if (relative_path == NULL) {
-    return NULL;  // Allocation failed
+    perror("Failed to allocate memory");
+    return NULL;
   }
 
 #ifdef _WIN32
@@ -20,8 +19,50 @@ char* derive_path(char* category, char* location, char* item) {
            item);  // Windows uses backslashes
 #else
   snprintf(relative_path, length, "%sdata/%s/%s/%s", global_setting_path,
-           category, location, item);  // Unix-like systems use forward slashes
+           category, location,
+           item);  // Unix-like systems use forward slashes
 #endif
+
+  // remove everything after a . in the last / segment of relative_path
+  char* last_slash = strrchr(relative_path, '/');
+  if (last_slash != NULL) {
+    char* dot = strchr(last_slash, '.');
+    if (dot != NULL) {
+      *dot = '\0';
+    }
+  }
+
+  return relative_path;
+}
+
+char* derive_path_to_location(char* category, char* location) {
+  // Calculate the length of the final path
+  size_t length =
+      strlen(global_setting_path) + strlen(category) + strlen(location) + 7;
+
+  // Allocate memory for the resulting path
+  char* relative_path = malloc(length);
+  if (relative_path == NULL) {
+    perror("Failed to allocate memory");
+    return NULL;
+  }
+
+#ifdef _WIN32
+  snprintf(relative_path, length, "%s\\%s", category, location,
+           item);  // Windows uses backslashes
+#else
+  snprintf(relative_path, length, "%sdata/%s/%s", global_setting_path, category,
+           location);  // Unix-like systems use forward slashes
+#endif
+
+  // remove everything after a . in the last / segment of relative_path
+  char* last_slash = strrchr(relative_path, '/');
+  if (last_slash != NULL) {
+    char* dot = strchr(last_slash, '.');
+    if (dot != NULL) {
+      *dot = '\0';
+    }
+  }
 
   return relative_path;
 }

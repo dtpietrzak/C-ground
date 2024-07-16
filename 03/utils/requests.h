@@ -2,16 +2,18 @@
 #define UTILS_REQUESTS_H
 
 #include <stdbool.h>
+#include <string.h>
 
 #include "../http.h"
 #include "utils.h"
 
 typedef struct {
-  bool valid;
+  char *invalid;
   char *key;
   char *db;
 } QueryParams;
 
-QueryParams validate_queries(HttpRequest *http_request);
+QueryParams validate_queries(HttpRequest *http_request, char *requiredParams[],
+                             int num_required);
 
 #endif  // UTILS_REQUESTS_H

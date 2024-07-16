@@ -1,0 +1,17 @@
+{
+    "colors": [
+        "red",
+        "white",
+        "blue"
+    ],
+    "flavors": [
+        "chocolate",
+        "vanilla",
+        "strawberry"
+    ],
+    "size": {
+        "width": 600,
+        "height": 400
+    },
+    "name": "donut"
+}

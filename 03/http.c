@@ -60,7 +60,6 @@ void parse_http_request(const char *request_str, HttpRequest *request) {
         }
       }
     }
-
     s_compile(&request->body, "%s", body_start + 4);
   }
 }
@@ -96,7 +95,7 @@ void compile_http_response(HttpResponse *http_response, SString *response_str) {
 
   SString response_content_str;
   s_init(&response_content_str, "", MAX_RES_SIZE);
-  s_compile(&response_content_str, "{\"status\": \"%d\", \"body\": %s}",
+  s_compile(&response_content_str, "{\"status\":\"%d\",\"body\":%s}",
             http_response->status, http_response->body.value);
 
   s_compile(response_str,

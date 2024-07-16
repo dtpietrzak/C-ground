@@ -12,3 +12,12 @@ bool contains_invalid_chars(const char* str, const char* invalid_chars) {
   }
   return false;
 }
+
+bool contains_periods(const char* str) {
+  for (const char* p = str; *p != '\0'; p++) {
+    if (*p == '.') {
+      return true;
+    }
+  }
+  return false;
+}

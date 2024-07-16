@@ -1,31 +1,42 @@
 #include "delete.h"
 
-void handle_request_delete(HttpRequest* http_request,
-                           HttpResponse* http_response) {
-  QueryParams queries = validate_queries(http_request);
-  char* relative_path = derive_path("dbs", queries.db, queries.key);
+int handle_request_delete(HttpRequest* http_request,
+                          HttpResponse* http_response) {
+  char* requiredParams[] = {"key", "db"};
+  QueryParams queries = validate_queries(http_request, requiredParams, 2);
+  if (queries.invalid != NULL) {
+    http_response->status = 400;
+    s_set(&http_response->body, queries.invalid);
+    return 1;
+  }
+
+  char* db_path = derive_path_to_item("db", queries.db, queries.key);
+  if (db_path == NULL) {
+    http_response->status = 400;
+    s_set(&http_response->body, "Failed to derive path");
+    return 1;
+  }
 
   // Check if the file exists
-  char* file_access_issue = check_file_access(relative_path, 1);
+  char* file_access_issue = check_file_access(db_path, 1);
   if (file_access_issue != NULL) {
     if (strcmp(file_access_issue, "Document does not exist") == 0) {
       http_response->status = 404;
     } else {
       http_response->status = 500;
     }
-
-    s_compile(&http_response->body, "\"%s: %s\"", file_access_issue,
-              relative_path);
-    return;
+    s_compile(&http_response->body, "%s: %s", file_access_issue, db_path);
+    return 1;
   }
 
   // Try to delete the file
-  if (remove(relative_path) == 0) {
+  if (remove(db_path) == 0) {
     http_response->status = 200;
-    s_compile(&http_response->body, "\"Removed %s successfully\"",
-              relative_path);
+    s_compile(&http_response->body, "\"Removed %s successfully\"", db_path);
+    return 0;
   } else {
     http_response->status = 500;
-    s_compile(&http_response->body, "\"Failed to remove %s\"", relative_path);
+    s_compile(&http_response->body, "Failed to remove %s", db_path);
+    return 1;
   }
 }

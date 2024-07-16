@@ -196,3 +196,41 @@ int s_matches(SString *s_string, const char *string_to_check) {
     return 1;
   }
 }
+
+int s_before_and_after(SString *s_string, const char *before, const char *after) {
+  // Ensure sstring and before/after are not NULL
+  if (s_string == NULL || s_string->value == NULL || before == NULL ||
+      after == NULL) {
+    return 1;
+  }
+
+  // Ensure sstring is not corrupt
+  if (strlen(s_string->value) != s_string->length) {
+    return 1;
+  }
+
+  // Calculate new length
+  int new_length = strlen(before) + strlen(after) + s_string->length;
+  if (new_length > s_string->max_length) {
+    return 1;
+  }
+
+  // Allocate memory for the string (plus one for null terminator)
+  char *new_value = (char *)malloc(new_length + 1);
+  if (new_value == NULL) {
+    return 1;
+  }
+
+  // build the new string into malloc'd memory
+  strcpy(new_value, before);
+  strcat(new_value, s_string->value);
+  strcat(new_value, after);
+
+  // update sstring struct
+  s_string->length = strlen(new_value);
+  if (s_string->value != NULL) {
+    free(s_string->value);
+  }
+  s_string->value = new_value;
+  return 0;
+}

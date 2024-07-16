@@ -7,6 +7,7 @@
 
 #include "global.c"
 #include "utils/sstring.h"
+#include "utils/utils.h"
 
 #define MAX_REQ_METHOD_SIZE 8
 #define MAX_REQ_PATH_SIZE 1024

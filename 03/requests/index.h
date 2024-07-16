@@ -18,5 +18,5 @@
 #include <sys/stat.h>  // For mkdir
 #endif
 
-int handle_request_upsert(HttpRequest* http_request,
-                          HttpResponse* http_response);
+int handle_request_index(HttpRequest* http_request,
+                         HttpResponse* http_response);

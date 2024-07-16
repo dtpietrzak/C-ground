@@ -6,6 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "../global.c"
+#include "utils.h"
+
 #ifdef _WIN32
 #include <direct.h>  // For Windows mkdir
 #define mkdir(directory, mode) _mkdir(directory)
@@ -18,7 +21,8 @@
 #include <unistd.h>
 #endif
 
-char* derive_path(char* category, char* location, char* item);
+char* derive_path_to_item(char* category, char* location, char* item);
+char* derive_path_to_location(char* category, char* location);
 int make_directory(const char* path);
 char* read_file_to_string(const char* relative_file_path);
 int save_string_to_file(const char* data_string,

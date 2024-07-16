@@ -3,6 +3,7 @@
 #include <string.h>
 #include <uv.h>
 
+#include "global.c"
 #include "server.h"
 #include "utils/settings.h"
 #include "utils/sstring.h"

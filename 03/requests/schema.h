@@ -6,6 +6,7 @@
 
 #include "../http.h"
 #include "../utils/file_operations.h"
+#include "../utils/parson.h"
 #include "../utils/requests.h"
 #include "../utils/utils.h"
 
@@ -17,5 +18,5 @@
 #include <sys/stat.h>  // For mkdir
 #endif
 
-void handle_request_query(HttpRequest* http_request,
+int handle_request_schema(HttpRequest* http_request,
                           HttpResponse* http_response);
