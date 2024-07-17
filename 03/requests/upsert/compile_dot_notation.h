@@ -7,7 +7,7 @@
 #include "../../http.h"
 #include "../../utils/file_operations.h"
 #include "../../utils/parson.h"
-#include "../../utils/requests.h"
+#include "../../utils/request_operations.h"
 #include "../../utils/utils.h"
 
 #ifdef _WIN32

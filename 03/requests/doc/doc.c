@@ -4,6 +4,7 @@
 
 int handle_request_doc(HttpRequest* http_request, HttpResponse* http_response) {
   char* requiredParams[] = {"key", "db"};
+
   QueryParams queries = validate_queries(http_request, requiredParams, 2);
   if (queries.invalid != NULL) {
     http_response->status = 400;
@@ -39,8 +40,7 @@ int handle_request_doc(HttpRequest* http_request, HttpResponse* http_response) {
     // because we're checking that above
     http_response->status = 500;
     s_compile(&http_response->body,
-              "Failed to read data from the requested document: %s",
-              db_path);
+              "Failed to read data from the requested document: %s", db_path);
     return 1;
   }
 

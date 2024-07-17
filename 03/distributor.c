@@ -1,9 +1,9 @@
 #include "distributor.h"
 
-#include "requests/delete.h"
-#include "requests/doc.h"
-#include "requests/index.h"
-#include "requests/schema.h"
+#include "requests/delete/delete.h"
+#include "requests/doc/doc.h"
+#include "requests/index/index.h"
+#include "requests/schema/schema.h"
 #include "requests/upsert/upsert.h"
 
 // distributor handles the incoming request and routes it to the correct handler

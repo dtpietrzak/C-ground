@@ -26,7 +26,7 @@ int handle_request_upsert(HttpRequest* http_request,
   }
 
   JSON_Value* request_json_value =
-      get_json_value(http_response, http_request->body.value);
+      get_request_json_value(http_response, http_request->body.value);
   if (request_json_value == NULL) return 1;
 
   char* schema_file_content =
@@ -49,47 +49,10 @@ int handle_request_upsert(HttpRequest* http_request,
 
   json_value_free(request_json_value);
 
-  // -1 error
-  // 0 had to create directory
-  // 1 directory already existed
-  int status = save_string_to_file(http_request->body.value, db_path);
-  switch (status) {
-    case -1: {
-      // Check if the file exists
-      char* file_access_issue = check_file_access(db_path, -2);
-      if (file_access_issue != NULL) {
-        http_response->status = 500;
-        s_compile(&http_response->body, "\"%s: %s\"", file_access_issue,
-                  db_path);
-        return 1;
-      }
-      http_response->status = 500;
-      s_compile(&http_response->body, "Failed to save data to document: %s",
-                db_path);
-      return 1;
-    }
-    case 0:
-      http_response->status = 201;
-      s_compile(&http_response->body, "\"Document inserted successfully: %s\"",
-                db_path);
-      return 0;
-    case 1:
-      http_response->status = 204;
-      s_compile(&http_response->body, "\"Document updated successfully: %s\"",
-                db_path);
-      return 0;
-    default: {
-      // Check if the file exists
-      char* file_access_issue = check_file_access(db_path, -2);
-      if (file_access_issue != NULL) {
-        http_response->status = 500;
-        s_compile(&http_response->body, "\"%s: %s\"", file_access_issue,
-                  db_path);
-        return 1;
-      }
-      http_response->status = 500;
-      s_compile(&http_response->body, "An unknown error occurred: %s", db_path);
-      return 1;
-    }
-  }
+  int save_status = save_string(http_response, http_request->body.value,
+                                db_path, "\"Document inserted successfully\"",
+                                "\"Document updated successfully\"",
+                                "Failed to save data to document");
+  if (save_status == -1) return 1;
+  return 0;
 }

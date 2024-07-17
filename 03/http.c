@@ -60,7 +60,7 @@ void parse_http_request(const char *request_str, HttpRequest *request) {
         }
       }
     }
-    s_compile(&request->body, "%s", body_start + 4);
+    s_set(&request->body, body_start + 4);
   }
 }
 
