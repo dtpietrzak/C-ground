@@ -4,7 +4,7 @@
 #include "requests/doc.h"
 #include "requests/index.h"
 #include "requests/schema.h"
-#include "requests/upsert.h"
+#include "requests/upsert/upsert.h"
 
 // distributor handles the incoming request and routes it to the correct handler
 // if there is a routing error it handles the status code and body

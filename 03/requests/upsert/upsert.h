@@ -4,11 +4,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../http.h"
-#include "../utils/file_operations.h"
-#include "../utils/parson.h"
-#include "../utils/requests.h"
-#include "../utils/utils.h"
+#include "../../http.h"
+#include "../../utils/file_operations.h"
+#include "../../utils/parson.h"
+#include "../../utils/requests.h"
+#include "../../utils/utils.h"
+#include "utils.h"
+#include "compile_dot_notation.h"
+#include "compile_entire_doc.h"
 
 #ifdef _WIN32
 #include <direct.h>  // For Windows mkdir

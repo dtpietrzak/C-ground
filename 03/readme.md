@@ -20,3 +20,93 @@ settings.json
   "path": "./"
 }
 ```
+
+## Generic Response
+
+```js
+{
+  "status": 200,
+  "body": ...response_body
+}
+```
+
+## Routes
+
+### POST /schema?db=desserts
+
+request body:
+
+``` json
+{
+    "colors": [""],
+    "flavors": [""],
+    "size": {
+        "width": 0,
+        "height": 0
+    }
+}
+```
+
+### POST /upsert?db=desserts&key=cake
+
+request body:
+
+``` json
+{
+    "colors": ["red", "white", "blue"],
+    "flavors": ["chocolate", "vanilla", "strawberry"],
+    "size": {
+        "width": 100,
+        "height": 200
+    }
+}
+```
+
+### POST /upsert?db=desserts&key=cake.colors
+
+request body:
+
+``` json
+["red", "white", "blue"]
+```
+
+### POST /upsert?db=desserts&key=cake.size.width
+
+request body:
+
+``` json
+100
+```
+
+### GET /docs?db=desserts&key=cake
+
+response body:
+
+``` json
+{
+    "colors": ["red", "white", "blue"],
+    "flavors": ["chocolate", "vanilla", "strawberry"],
+    "size": {
+        "width": 100,
+        "height": 200
+    }
+}
+```
+
+### GET /docs?db=desserts&key=cake.colors
+
+response body:
+
+``` json
+["red", "white", "blue"]
+```
+
+### GET /docs?db=desserts&key=cake.size.width
+
+response body:
+
+``` json
+100
+```
+
+### DELETE /delete?db=dessert&key=cake
