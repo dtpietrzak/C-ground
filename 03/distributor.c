@@ -17,10 +17,10 @@
 
 // 0 = move on (thank you, next)
 // 1 = exit early
-int endpoint(HttpRequest* http_request, HttpResponse* http_response,
-             const char* path, const char* method,
+int endpoint(const char* path, const char* method,
              int (*handler)(HttpRequest*, HttpResponse*),
-             const char* error_prefix) {
+             const char* error_prefix, HttpRequest* http_request,
+             HttpResponse* http_response) {
   if (strcmp(http_request->path, path) == 0) {
     if (strcmp(http_request->method, method) == 0) {
       if (handler(http_request, http_response) == 0) {
@@ -44,28 +44,28 @@ int endpoint(HttpRequest* http_request, HttpResponse* http_response,
 }
 
 void handle_request(HttpRequest* http_request, HttpResponse* http_response) {
-  if (endpoint(http_request, http_response, "/doc", "GET", handle_request_doc,
-               "Failed to get document: ")) {
+  if (endpoint("/doc", "GET", handle_request_doc,
+               "Failed to get document: ", http_request, http_response)) {
     return;
   }
 
-  if (endpoint(http_request, http_response, "/upsert", "POST",
-               handle_request_upsert, "Failed to upsert document: ")) {
+  if (endpoint("/upsert", "POST", handle_request_upsert,
+               "Failed to upsert document: ", http_request, http_response)) {
     return;
   }
 
-  if (endpoint(http_request, http_response, "/delete", "DELETE",
-               handle_request_delete, "Failed to delete document: ")) {
+  if (endpoint("/delete", "DELETE", handle_request_delete,
+               "Failed to delete document: ", http_request, http_response)) {
     return;
   }
 
-  if (endpoint(http_request, http_response, "/schema", "POST",
-               handle_request_schema, "Failed to save schema: ")) {
+  if (endpoint("/schema", "POST", handle_request_schema,
+               "Failed to save schema: ", http_request, http_response)) {
     return;
   }
 
-  if (endpoint(http_request, http_response, "/index", "POST",
-               handle_request_index, "Failed to index: ")) {
+  if (endpoint("/index", "POST", handle_request_index,
+               "Failed to index: ", http_request, http_response)) {
     return;
   }
 
