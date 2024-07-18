@@ -2,61 +2,55 @@
 
 #define MAX_PATH_LENGTH 1024
 
-char* derive_path_to_item(char* category, char* location, char* item) {
-  // Calculate the length of the final path
-  size_t length = strlen(global_setting_path) + strlen(category) +
-                  strlen(location) + strlen(item) + 8;
+#ifdef _WIN32
+#define PATH_SEPARATOR "\\"
+#else
+#define PATH_SEPARATOR "/"
+#endif
+
+char* derive_path(int num_args, ...) {
+  // Start with the base path length
+  size_t length = strlen(global_setting_path) + 5;  // "data/" + null terminator
+  va_list args;
+  va_start(args, num_args);
+
+  // Calculate the total length required
+  for (int i = 0; i < num_args; i++) {
+    const char* arg = va_arg(args, const char*);
+    if (arg == NULL) {
+      fprintf(stderr, "Null pointer encountered for argument %d\n", i);
+      va_end(args);
+      return NULL;
+    }
+    length += strlen(arg) + 1;  // For the arg length and a slash
+  }
 
   // Allocate memory for the resulting path
   char* relative_path = malloc(length);
   if (relative_path == NULL) {
     perror("Failed to allocate memory");
+    va_end(args);
     return NULL;
   }
 
-#ifdef _WIN32
-  snprintf(relative_path, length, "%s\\%s\\%s", category, location,
-           item);  // Windows uses backslashes
-#else
-  snprintf(relative_path, length, "%sdata/%s/%s/%s", global_setting_path,
-           category, location,
-           item);  // Unix-like systems use forward slashes
-#endif
+  // Construct the path
+  strcpy(relative_path, global_setting_path);
+  strcat(relative_path, "data");
+  strcat(relative_path, PATH_SEPARATOR);
 
-  // remove everything after a . in the last / segment of relative_path
-  char* last_slash = strrchr(relative_path, '/');
-  if (last_slash != NULL) {
-    char* dot = strchr(last_slash, '.');
-    if (dot != NULL) {
-      *dot = '\0';
+  va_start(args, num_args);  // Re-initialize args to iterate again
+  for (int i = 0; i < num_args; i++) {
+    const char* arg = va_arg(args, const char*);
+    strcat(relative_path, arg);
+    if (i < num_args - 1) {
+      strcat(relative_path, PATH_SEPARATOR);
     }
   }
 
-  return relative_path;
-}
-
-char* derive_path_to_location(char* category, char* location) {
-  // Calculate the length of the final path
-  size_t length =
-      strlen(global_setting_path) + strlen(category) + strlen(location) + 7;
-
-  // Allocate memory for the resulting path
-  char* relative_path = malloc(length);
-  if (relative_path == NULL) {
-    perror("Failed to allocate memory");
-    return NULL;
-  }
-
-#ifdef _WIN32
-  snprintf(relative_path, length, "%s\\%s", category, location,
-           item);  // Windows uses backslashes
-#else
-  snprintf(relative_path, length, "%sdata/%s/%s", global_setting_path, category,
-           location);  // Unix-like systems use forward slashes
-#endif
+  va_end(args);
 
   // remove everything after a . in the last / segment of relative_path
-  char* last_slash = strrchr(relative_path, '/');
+  const char* last_slash = strrchr(relative_path, PATH_SEPARATOR[0]);
   if (last_slash != NULL) {
     char* dot = strchr(last_slash, '.');
     if (dot != NULL) {
@@ -119,7 +113,7 @@ char* read_file_to_string(const char* relative_file_path) {
 
   // Read the file into the buffer
   size_t read_size = fread(file_content, 1, file_size, file);
-  if (read_size != file_size) {
+  if (read_size != (size_t)file_size) {
     perror("Failed to read file");
     free(file_content);
     fclose(file);

@@ -7,7 +7,10 @@ void process_request(const char *request_str, SString *response_str) {
   HttpResponse http_response;
   s_init(&http_response.body, "", MAX_RES_SIZE);
 
-  if (strlen(request_str) > MAX_REQ_SIZE) {
+  if (request_str == NULL) {
+    http_response.status = 400;
+    s_set(&http_response.body, "Empty request");
+  } else if (strlen(request_str) > MAX_REQ_SIZE) {
     http_response.status = 400;
     s_set(&http_response.body, "Request too large");
   } else {
@@ -79,7 +82,7 @@ void on_read(uv_stream_t *client_stream, ssize_t nread, const uv_buf_t *buf) {
   }
 }
 
-int validate_tcp_ip(uv_tcp_t *client) {
+int validate_tcp_ip(const uv_tcp_t *client) {
   struct sockaddr_storage peername;
   int namelen = sizeof(peername);
 
@@ -91,7 +94,7 @@ int validate_tcp_ip(uv_tcp_t *client) {
       uv_ip6_name((struct sockaddr_in6 *)&peername, ip, 16);
     }
 
-    if (strcmp(global_setting_ip, ip) == 0) {
+    if (strncmp(global_setting_ip, ip, 18) == 0) {
       return 0;
     } else {
       fprintf(stderr, "Client attempted illegal connection from IP: %s\n", ip);

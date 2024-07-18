@@ -1,3 +1,5 @@
+#include <stdint.h>
+
 char *global_setting_auth;
 char *global_setting_ip;
 int16_t global_setting_port;

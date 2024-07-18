@@ -15,7 +15,7 @@ QueryParams validate_queries(HttpRequest* http_request, char* required_params[],
   };
 
   if (num_required != http_request->num_queries) {
-    queryParams.invalid = "\"Invalid number of queries\"";
+    queryParams.invalid = "Invalid number of queries";
     return queryParams;
   }
 
@@ -40,29 +40,29 @@ QueryParams validate_queries(HttpRequest* http_request, char* required_params[],
 
   if (key_is_required) {
     if (queryParams.key == NULL) {
-      queryParams.invalid = "\"Key is missing\"";
+      queryParams.invalid = "Key is missing";
       return queryParams;
     } else if (contains_invalid_chars(queryParams.key,
                                       INVALID_CHARS_DIRS_AND_FILES)) {
-      queryParams.invalid = "\"Key contains invalid characters\"";
+      queryParams.invalid = "Key contains invalid characters";
       return queryParams;
     }
   }
 
   if (db_is_required) {
     if (queryParams.db == NULL) {
-      queryParams.invalid = "\"Db name is missing\"";
+      queryParams.invalid = "Db name is missing";
       return queryParams;
     } else if (contains_invalid_chars(queryParams.db,
                                       INVALID_CHARS_DIRS_AND_FILES)) {
       queryParams.invalid =
-          "\"Db name contains invalid characters (cannot contain: "
-          "\\/:*?\"<>|)\"";
+          "Db name contains invalid characters (cannot contain: "
+          "\\/:*?\"<>|)";
       return queryParams;
     }
     if (contains_periods(queryParams.db)) {
       queryParams.invalid =
-          "\"Db name contains invalid characters (cannot contain a period)\"";
+          "Db name contains invalid characters (cannot contain a period)";
       return queryParams;
     }
   }
@@ -78,9 +78,10 @@ QueryParams validate_queries(HttpRequest* http_request, char* required_params[],
 //
 // Returns the file content if successful, NULL if not
 char* get_file_content(HttpResponse* http_response, char* relative_path,
-                       char* error_message_404, char* error_message_500) {
+                       const char* error_message_404,
+                       const char* error_message_500) {
   // Check if the file exists
-  char* schema_file_access_issue = check_file_access(relative_path, 1);
+  const char* schema_file_access_issue = check_file_access(relative_path, 1);
   if (schema_file_access_issue != NULL) {
     if (strcmp(schema_file_access_issue, "Document does not exist") == 0) {
       http_response->status = 404;
@@ -130,14 +131,14 @@ JSON_Value* get_json_value(HttpResponse* http_response, char* string_to_parse,
 // Returns 0 if the file is new and saved successfully
 // Returns 1 if the file is updated and saved successfully
 // Returns -1 if there is an issue saving the file
-int save_string(HttpResponse* http_response, char* string_to_save,
-                char* relative_path, char* success_message_201,
-                char* success_message_204, char* error_message_500) {
+int save_string(HttpResponse* http_response, const char* string_to_save,
+                char* relative_path, const char* success_message_201,
+                const char* success_message_204, char* error_message_500) {
   int status = save_string_to_file(string_to_save, relative_path);
   switch (status) {
     case -1: {
       // Check if the file exists
-      char* file_access_issue = check_file_access(relative_path, -2);
+      const char* file_access_issue = check_file_access(relative_path, -2);
       if (file_access_issue != NULL) {
         http_response->status = 500;
         strcat(error_message_500, " - ");

@@ -12,7 +12,7 @@ int handle_request_doc(HttpRequest* http_request, HttpResponse* http_response) {
     return 1;
   }
 
-  char* db_path = derive_path_to_item("db", queries.db, queries.key);
+  char* db_path = derive_path(3, "db", queries.db, queries.key);
 
   // if db_path is an error message
   if (db_path == NULL) {

@@ -15,63 +15,61 @@
 // if they return non-zero, the distributor will prepend the error message
 // and wrap it in quotes
 
-void handle_request(HttpRequest* http_request, HttpResponse* http_response) {
-  if (strcmp(http_request->path, "/doc") == 0) {
-    if (strcmp(http_request->method, "GET") == 0) {
-      if (handle_request_doc(http_request, http_response) != 0) {
-        s_before_and_after(&http_response->body, "\"Failed to get doc: ", "\"");
+// 0 = move on (thank you, next)
+// 1 = exit early
+int endpoint(HttpRequest* http_request, HttpResponse* http_response,
+             const char* path, const char* method,
+             int (*handler)(HttpRequest*, HttpResponse*),
+             const char* error_prefix) {
+  if (strcmp(http_request->path, path) == 0) {
+    if (strcmp(http_request->method, method) == 0) {
+      if (handler(http_request, http_response) == 0) {
+        return 1;
+      } else {
+        char* error_message = s_out(&http_response->body);
+        s_compile(&http_response->body, "\"%s%s\"", error_prefix,
+                  error_message);
+        free(error_message);
+        return 1;
       }
     } else {
       http_response->status = 400;
-      s_set(&http_response->body,
-            "\"Invalid method. Requests to /doc should be GET\"");
+      s_compile(&http_response->body,
+                "\"Invalid method. Requests to %s should be %s\"", path,
+                method);
+      return 1;
     }
-  } else if (strcmp(http_request->path, "/upsert") == 0) {
-    if (strcmp(http_request->method, "POST") == 0) {
-      if (handle_request_upsert(http_request, http_response) != 0) {
-        s_before_and_after(&http_response->body, "\"Failed to upsert: ", "\"");
-      }
-    } else {
-      http_response->status = 400;
-      s_set(&http_response->body,
-            "\"Invalid method. Requests to /upsert should be POST\"");
-    }
-  } else if (strcmp(http_request->path, "/delete") == 0) {
-    if (strcmp(http_request->method, "DELETE") == 0) {
-      if (handle_request_delete(http_request, http_response) != 0) {
-        s_before_and_after(&http_response->body, "\"Failed to delete: ", "\"");
-      }
-    } else {
-      http_response->status = 400;
-      s_set(&http_response->body,
-            "\"Invalid method. Requests to /delete should be DELETE\"");
-    }
-  } else if (strcmp(http_request->path, "/schema") == 0) {
-    if (strcmp(http_request->method, "POST") == 0) {
-      if (handle_request_schema(http_request, http_response) != 0) {
-        s_before_and_after(&http_response->body,
-                           "\"Failed to save schema: ", "\"");
-      }
-    } else {
-      http_response->status = 400;
-      s_set(&http_response->body,
-            "\"Invalid method. Requests to /delete should be POST\"");
-    }
-  } else if (strcmp(http_request->path, "/index") == 0) {
-    if (strcmp(http_request->method, "POST") == 0) {
-      if (handle_request_index(http_request, http_response) != 0) {
-        s_before_and_after(&http_response->body, "\"Failed to index: ", "\"");
-      }
-    } else {
-      http_response->status = 400;
-      s_set(&http_response->body,
-            "\"Invalid method. Requests to /index should be POST\"");
-    }
-  } else {
-    http_response->status = 404;
-    s_set(&http_response->body, "\"Endpoint not found\"");
   }
-  // heads up, we still get here because we don't return earlier
-  // each if statement else's through
-  // so it should ever only end down one branch
+  return 0;
+}
+
+void handle_request(HttpRequest* http_request, HttpResponse* http_response) {
+  if (endpoint(http_request, http_response, "/doc", "GET", handle_request_doc,
+               "Failed to get document: ")) {
+    return;
+  }
+
+  if (endpoint(http_request, http_response, "/upsert", "POST",
+               handle_request_upsert, "Failed to upsert document: ")) {
+    return;
+  }
+
+  if (endpoint(http_request, http_response, "/delete", "DELETE",
+               handle_request_delete, "Failed to delete document: ")) {
+    return;
+  }
+
+  if (endpoint(http_request, http_response, "/schema", "POST",
+               handle_request_schema, "Failed to save schema: ")) {
+    return;
+  }
+
+  if (endpoint(http_request, http_response, "/index", "POST",
+               handle_request_index, "Failed to index: ")) {
+    return;
+  }
+
+  http_response->status = 404;
+  s_set(&http_response->body, "\"Endpoint not found\"");
+  return;
 }

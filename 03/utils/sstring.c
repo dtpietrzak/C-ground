@@ -177,7 +177,7 @@ int s_compile(SString *s_string, const char *format, ...) {
   return 0;
 }
 
-int s_contains_chars(SString *s_string, const char *chars_to_check) {
+int s_contains_chars(const SString *s_string, const char *chars_to_check) {
   for (const char *p = s_string->value; *p != '\0'; p++) {
     if (strchr(chars_to_check, *p) != NULL) {
       return 0;
@@ -233,4 +233,14 @@ int s_before_and_after(SString *s_string, const char *before, const char *after)
   }
   s_string->value = new_value;
   return 0;
+}
+
+char* s_out(SString* s_string) {
+  char* out = (char*)malloc(s_string->length + 1);
+  if (out == NULL) {
+    return NULL;
+  }
+  strncpy(out, s_string->value, s_string->length);
+  out[s_string->length] = '\0';
+  return out;
 }

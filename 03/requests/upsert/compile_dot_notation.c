@@ -12,7 +12,7 @@ int compile_dot_notation_change(HttpResponse* http_response,
     } else {
       http_response->status = 500;
     }
-    s_compile(&http_response->body, "\"%s: %s\"", file_access_issue, db_path);
+    s_compile(&http_response->body, "%s: %s", file_access_issue, db_path);
     return 1;
   }
 

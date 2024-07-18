@@ -2,6 +2,7 @@
 #define UTILS_FILE_OPS_H
 
 #include <errno.h>
+#include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -21,6 +22,7 @@
 #include <unistd.h>
 #endif
 
+char* derive_path(int num_args, ...);
 char* derive_path_to_item(char* category, char* location, char* item);
 char* derive_path_to_location(char* category, char* location);
 int make_directory(const char* path);

@@ -10,7 +10,7 @@ int handle_request_delete(HttpRequest* http_request,
     return 1;
   }
 
-  char* db_path = derive_path_to_item("db", queries.db, queries.key);
+  char* db_path = derive_path(3, "db", queries.db, queries.key);
   if (db_path == NULL) {
     http_response->status = 400;
     s_set(&http_response->body, "Failed to derive path");

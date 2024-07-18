@@ -12,22 +12,23 @@ int handle_request_upsert(HttpRequest* http_request,
     return 1;
   }
 
-  char* db_path = derive_path_to_item("db", queries.db, queries.key);
+  char* db_path = derive_path(3, "db", queries.db, queries.key);
   if (db_path == NULL) {
     http_response->status = 400;
     s_set(&http_response->body, "Failed to derive db path");
     return 1;
   }
-  char* schema_path = derive_path_to_location("schema", queries.db);
+  char* schema_path = derive_path(2, "schema", queries.db);
   if (schema_path == NULL) {
     http_response->status = 400;
     s_set(&http_response->body, "Failed to derive schema path");
     return 1;
   }
 
-  JSON_Value* request_json_value =
-      get_request_json_value(http_response, http_request->body.value);
-  if (request_json_value == NULL) return 1;
+  JSON_Value* request_body_json_value =
+      get_json_value(http_response, http_request->body.value,
+                     "Failed to parse request JSON data");
+  if (request_body_json_value == NULL) return 1;
 
   char* schema_file_content =
       get_schema_file_content(http_response, schema_path, db_path, queries);
@@ -37,17 +38,17 @@ int handle_request_upsert(HttpRequest* http_request,
     // HANDLE DOT NOTATION UPSERT
     int compile_status = compile_dot_notation_change(
         http_response, http_request, db_path, queries, schema_file_content,
-        request_json_value);
+        request_body_json_value);
     if (compile_status == 1) return 1;
   } else {
     // HANDLE ENTIRE DOC UPSERT
     int compile_status =
         compile_doc_change(http_response, http_request, db_path, queries,
-                           schema_file_content, request_json_value);
+                           schema_file_content, request_body_json_value);
     if (compile_status == 1) return 1;
   }
 
-  json_value_free(request_json_value);
+  json_value_free(request_body_json_value);
 
   int save_status = save_string(http_response, http_request->body.value,
                                 db_path, "\"Document inserted successfully\"",

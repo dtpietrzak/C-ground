@@ -13,7 +13,7 @@ int handle_request_schema(HttpRequest* http_request,
   }
 
   // char* db_path = derive_path("db", queries.db, queries.key);
-  char* schema_path = derive_path_to_location("schema", queries.db);
+  char* schema_path = derive_path(2, "schema", queries.db);
 
   JSON_Value* json_value =
       json_parse_string_with_comments(http_request->body.value);
