@@ -1,9 +1,5 @@
 {
-    "colors": [
-        "red",
-        "white",
-        "blue"
-    ],
+    "colors": [],
     "flavors": [
         "chocolate",
         "vanilla",
@@ -13,5 +9,6 @@
         "width": 600,
         "height": 400
     },
-    "name": "donut"
+    "name": "blake",
+    "shirt": "medium"
 }

@@ -3,7 +3,7 @@
 #define MAX_PATH_LENGTH 1024
 
 int handle_request_doc(HttpRequest* http_request, HttpResponse* http_response) {
-  char* requiredParams[] = {"key", "db"};
+  char* requiredParams[] = {"id", "db"};
 
   QueryParams queries = validate_queries(http_request, requiredParams, 2);
   if (queries.invalid != NULL) {
@@ -12,7 +12,7 @@ int handle_request_doc(HttpRequest* http_request, HttpResponse* http_response) {
     return 1;
   }
 
-  char* db_path = derive_path(3, "db", queries.db, queries.key);
+  char* db_path = derive_path(3, "db", queries.db, queries.id);
 
   // if db_path is an error message
   if (db_path == NULL) {
@@ -44,18 +44,18 @@ int handle_request_doc(HttpRequest* http_request, HttpResponse* http_response) {
     return 1;
   }
 
-  if (contains_periods(queries.key)) {
+  if (contains_periods(queries.id)) {
     // remove the before the first dot and the first dot itself
-    char* json_key = strchr(queries.key, '.') + 1;
+    char* json_id = strchr(queries.id, '.') + 1;
 
     // parse the json to get its value
     JSON_Value* json = json_parse_string_with_comments(file_content);
     JSON_Object* json_object = json_value_get_object(json);
-    JSON_Value* value = json_object_dotget_value(json_object, json_key);
+    JSON_Value* value = json_object_dotget_value(json_object, json_id);
     if (value == NULL) {
       http_response->status = 404;
-      s_compile(&http_response->body, "Key not found in document: %s",
-                queries.key);
+      s_compile(&http_response->body, "id not found in document: %s",
+                queries.id);
       return 1;
     } else {
       http_response->status = 200;

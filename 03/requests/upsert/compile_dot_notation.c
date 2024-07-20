@@ -17,7 +17,7 @@ int compile_dot_notation_change(HttpResponse* http_response,
   }
 
   // remove the before the first dot and the first dot itself
-  char* json_key = strchr(queries.key, '.') + 1;
+  char* json_id = strchr(queries.id, '.') + 1;
 
   JSON_Value* schema_json =
       json_parse_string_with_comments(schema_file_content);
@@ -36,7 +36,7 @@ int compile_dot_notation_change(HttpResponse* http_response,
               schema_file_content);
     return 1;
   }
-  JSON_Value* schema_value = json_object_dotget_value(schema_object, json_key);
+  JSON_Value* schema_value = json_object_dotget_value(schema_object, json_id);
 
   // need to get this validation working
   if (json_value_get_type(schema_value) !=
@@ -73,15 +73,15 @@ int compile_dot_notation_change(HttpResponse* http_response,
   }
 
   JSON_Value* document_value =
-      json_object_dotget_value(document_json_object, json_key);
+      json_object_dotget_value(document_json_object, json_id);
   if (document_value == NULL) {
     http_response->status = 404;
-    s_compile(&http_response->body, "Key not found in document: %s",
-              queries.key);
+    s_compile(&http_response->body, "id not found in document: %s",
+              queries.id);
     return 1;
   }
 
-  json_object_dotset_value(document_json_object, json_key, request_json_value);
+  json_object_dotset_value(document_json_object, json_id, request_json_value);
   char* updated_json = json_serialize_to_string_pretty(document_json);
   s_set(&http_request->body, updated_json);
   json_free_serialized_string(updated_json);

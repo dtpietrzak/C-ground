@@ -23,12 +23,10 @@
 #endif
 
 char* derive_path(int num_args, ...);
-char* derive_path_to_item(char* category, char* location, char* item);
-char* derive_path_to_location(char* category, char* location);
 int make_directory(const char* path);
 char* read_file_to_string(const char* relative_file_path);
 int save_string_to_file(const char* data_string,
                         const char* relative_file_path);
-char* check_file_access(char* path, int8_t level);
+char* check_file_access(const char* path, int8_t level);
 
 #endif  // UTILS_FILE_OPS_H

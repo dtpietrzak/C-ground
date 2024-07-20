@@ -176,7 +176,7 @@ int save_string_to_file(const char* data_string,
 //
 // returns NULL if no issues
 //   else a string describing the issue
-char* check_file_access(char* path, int8_t level) {
+char* check_file_access(const char* path, const int8_t level) {
   // Check if the file is executable
   if (level == -3) {
     if (access(path, X_OK) == 0) {

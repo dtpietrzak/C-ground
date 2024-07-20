@@ -20,7 +20,7 @@ int s_append(SString* s_string, const char* append_value);
 int s_prepend(SString* s_string, const char* prepend_value);
 int s_compile(SString* s_string, const char* format, ...);
 int s_contains_chars(const SString* s_string, const char* chars_to_check);
-int s_matches(SString* s_string, const char* string_to_check);
+int s_matches(const SString* s_string, const char* string_to_check);
 int s_before_and_after(SString* s_string, const char* before,
                        const char* after);
 char* s_out(SString* s_string);

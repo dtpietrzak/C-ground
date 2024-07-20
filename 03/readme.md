@@ -47,7 +47,7 @@ request body:
 }
 ```
 
-### POST /upsert?db=desserts&key=cake
+### POST /upsert?db=desserts&id=cake
 
 request body:
 
@@ -62,7 +62,7 @@ request body:
 }
 ```
 
-### POST /upsert?db=desserts&key=cake.colors
+### POST /upsert?db=desserts&id=cake.colors
 
 request body:
 
@@ -70,7 +70,7 @@ request body:
 ["red", "white", "blue"]
 ```
 
-### POST /upsert?db=desserts&key=cake.size.width
+### POST /upsert?db=desserts&id=cake.size.width
 
 request body:
 
@@ -78,7 +78,7 @@ request body:
 100
 ```
 
-### GET /docs?db=desserts&key=cake
+### GET /docs?db=desserts&id=cake
 
 response body:
 
@@ -93,7 +93,7 @@ response body:
 }
 ```
 
-### GET /docs?db=desserts&key=cake.colors
+### GET /docs?db=desserts&id=cake.colors
 
 response body:
 
@@ -101,7 +101,7 @@ response body:
 ["red", "white", "blue"]
 ```
 
-### GET /docs?db=desserts&key=cake.size.width
+### GET /docs?db=desserts&id=cake.size.width
 
 response body:
 
@@ -109,4 +109,4 @@ response body:
 100
 ```
 
-### DELETE /delete?db=dessert&key=cake
+### DELETE /delete?db=dessert&id=cake

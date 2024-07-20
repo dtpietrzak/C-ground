@@ -6,6 +6,7 @@
 
 #include "../../http.h"
 #include "../../utils/file_operations.h"
+#include "../../utils/dir_operations.h"
 #include "../../utils/parson.h"
 #include "../../utils/request_operations.h"
 #include "../../utils/utils.h"
@@ -18,5 +19,5 @@
 #include <sys/stat.h>  // For mkdir
 #endif
 
-int handle_request_index(HttpRequest* http_request,
-                         HttpResponse* http_response);
+int handle_request_index_delete(HttpRequest* http_request,
+                                HttpResponse* http_response);

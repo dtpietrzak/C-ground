@@ -19,7 +19,7 @@ void parse_http_request(const char *request_str, HttpRequest *request) {
         *equal_sign = '\0';
         equal_sign++;
 
-        // key
+        // id
         strncpy(request->queries[query_index][0], param_pair,
                 MAX_REQ_QUERY_SIZE - 1);
         request->queries[query_index][0][MAX_REQ_QUERY_SIZE - 1] = '\0';
@@ -29,7 +29,7 @@ void parse_http_request(const char *request_str, HttpRequest *request) {
                 MAX_REQ_QUERY_SIZE - 1);
         request->queries[query_index][1][MAX_REQ_QUERY_SIZE - 1] = '\0';
       } else {
-        // No '=' found, treat as key with empty value
+        // No '=' found, treat as id with empty value
         strncpy(request->queries[query_index][0], param_pair,
                 MAX_REQ_QUERY_SIZE - 1);
         request->queries[query_index][0][MAX_REQ_QUERY_SIZE - 1] = '\0';

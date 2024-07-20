@@ -2,7 +2,8 @@
 
 #include "requests/delete/delete.h"
 #include "requests/doc/doc.h"
-#include "requests/index/index.h"
+#include "requests/index/index_delete.h"
+#include "requests/index/index_upsert.h"
 #include "requests/schema/schema.h"
 #include "requests/upsert/upsert.h"
 
@@ -64,8 +65,13 @@ void handle_request(HttpRequest* http_request, HttpResponse* http_response) {
     return;
   }
 
-  if (endpoint("/index", "POST", handle_request_index,
-               "Failed to index: ", http_request, http_response)) {
+  if (endpoint("/index/upsert", "POST", handle_request_index_upsert,
+               "Failed to save index: ", http_request, http_response)) {
+    return;
+  }
+
+  if (endpoint("/index/delete", "DELETE", handle_request_index_delete,
+               "Failed to delete index: ", http_request, http_response)) {
     return;
   }
 

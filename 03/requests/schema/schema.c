@@ -12,7 +12,7 @@ int handle_request_schema(HttpRequest* http_request,
     return 1;
   }
 
-  // char* db_path = derive_path("db", queries.db, queries.key);
+  // char* db_path = derive_path("db", queries.db, queries.id);
   char* schema_path = derive_path(2, "schema", queries.db);
 
   JSON_Value* json_value =

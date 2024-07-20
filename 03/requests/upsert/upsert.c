@@ -4,7 +4,7 @@
 
 int handle_request_upsert(HttpRequest* http_request,
                           HttpResponse* http_response) {
-  char* requiredParams[] = {"key", "db"};
+  char* requiredParams[] = {"id", "db"};
   QueryParams queries = validate_queries(http_request, requiredParams, 2);
   if (queries.invalid != NULL) {
     http_response->status = 400;
@@ -12,7 +12,7 @@ int handle_request_upsert(HttpRequest* http_request,
     return 1;
   }
 
-  char* db_path = derive_path(3, "db", queries.db, queries.key);
+  char* db_path = derive_path(3, "db", queries.db, queries.id);
   if (db_path == NULL) {
     http_response->status = 400;
     s_set(&http_response->body, "Failed to derive db path");
@@ -34,7 +34,7 @@ int handle_request_upsert(HttpRequest* http_request,
       get_schema_file_content(http_response, schema_path, db_path, queries);
   if (schema_file_content == NULL) return 1;
 
-  if (contains_periods(queries.key)) {
+  if (contains_periods(queries.id)) {
     // HANDLE DOT NOTATION UPSERT
     int compile_status = compile_dot_notation_change(
         http_response, http_request, db_path, queries, schema_file_content,

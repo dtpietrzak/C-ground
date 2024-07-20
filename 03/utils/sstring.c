@@ -35,6 +35,7 @@ int s_init(SString *s_string, const char *value, uint16_t max_length) {
   if (s_string->value == NULL) {
     return 1;  // Allocation failed
   }
+  s_string->value[0] = '\0';
 
   // Copy the value and null terminate
   strncpy(s_string->value, value, s_string->length);
@@ -61,6 +62,7 @@ int s_set(SString *s_string, const char *value) {
   if (s_string->value == NULL) {
     return 1;  // Allocation failed
   }
+  s_string->value[0] = '\0';
 
   // Copy the value and null terminate
   strncpy(s_string->value, value, s_string->length);
@@ -71,12 +73,20 @@ int s_set(SString *s_string, const char *value) {
 
 int s_append(SString *s_string, const char *append_value) {
   // Ensure sstring and append_value are not NULL
-  if (s_string == NULL || s_string->value == NULL || append_value == NULL) {
+  if (s_string == NULL) {
+    printf("s_append error: s_string is NULL\n");
+    return 1;
+  } else if (s_string->value == NULL) {
+    printf("s_append error: s_string->value is NULL\n");
+    return 1;
+  } else if (append_value == NULL) {
+    printf("s_append error: append_value is NULL\n");
     return 1;
   }
 
   // Ensure sstring is not corrupt
   if (strlen(s_string->value) != s_string->length) {
+    printf("s_append error: s_string is corrupt, invalid ->length\n");
     return 1;
   }
 
@@ -86,21 +96,29 @@ int s_append(SString *s_string, const char *append_value) {
 
   // Check if new length exceeds max_length
   if (new_length > s_string->max_length) {
+    printf("s_append error: new_length exceeds max_length\n");
     return 1;
   }
 
-  // Realloc to accommodate new length
-  s_string->value = realloc(s_string->value, new_length + 1);
-  if (s_string->value == NULL) {
+  // Malloc a new one
+  char *new_value = (char *)malloc(new_length + 1);
+  if (new_value == NULL) {
+    printf("s_append error: malloc failed\n");
     return 1;  // Allocation failed
   }
+  new_value[0] = '\0';
 
   // Append string onto newly allocated memory
-  strncat(s_string->value, append_value, append_length);
-  s_string->value[new_length] = '\0';
+  strncpy(new_value, s_string->value, s_string->length + 1);
+  strncat(new_value, append_value, append_length + 1);
+  new_value[new_length] = '\0';
 
-  // update sstring struct
+  // Update sstring struct
   s_string->length = new_length;
+  if (s_string->value != NULL) {
+    free(s_string->value);
+  }
+  s_string->value = new_value;
   return 0;
 }
 
@@ -129,6 +147,7 @@ int s_prepend(SString *s_string, const char *prepend_value) {
   if (new_value == NULL) {
     return 1;  // Allocation failed
   }
+  new_value[0] = '\0';
 
   // Append string onto newly allocated memory
   strncpy(new_value, prepend_value, prepend_length);
@@ -153,6 +172,7 @@ int s_compile(SString *s_string, const char *format, ...) {
   if (s_string->value == NULL) {
     return 1;  // Allocation failed
   }
+  s_string->value[0] = '\0';
 
   va_list args;
   va_start(args, format);
@@ -186,7 +206,7 @@ int s_contains_chars(const SString *s_string, const char *chars_to_check) {
   return 1;
 }
 
-int s_matches(SString *s_string, const char *string_to_check) {
+int s_matches(const SString *s_string, const char *string_to_check) {
   if (strlen(string_to_check) > s_string->max_length) {
     return 1;
   }
@@ -197,7 +217,8 @@ int s_matches(SString *s_string, const char *string_to_check) {
   }
 }
 
-int s_before_and_after(SString *s_string, const char *before, const char *after) {
+int s_before_and_after(SString *s_string, const char *before,
+                       const char *after) {
   // Ensure sstring and before/after are not NULL
   if (s_string == NULL || s_string->value == NULL || before == NULL ||
       after == NULL) {
@@ -220,6 +241,7 @@ int s_before_and_after(SString *s_string, const char *before, const char *after)
   if (new_value == NULL) {
     return 1;
   }
+  new_value[0] = '\0';
 
   // build the new string into malloc'd memory
   strcpy(new_value, before);
@@ -235,11 +257,12 @@ int s_before_and_after(SString *s_string, const char *before, const char *after)
   return 0;
 }
 
-char* s_out(SString* s_string) {
-  char* out = (char*)malloc(s_string->length + 1);
+char *s_out(SString *s_string) {
+  char *out = (char *)malloc(s_string->length + 1);
   if (out == NULL) {
     return NULL;
   }
+  out[0] = '\0';
   strncpy(out, s_string->value, s_string->length);
   out[s_string->length] = '\0';
   return out;

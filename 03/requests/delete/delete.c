@@ -2,7 +2,7 @@
 
 int handle_request_delete(HttpRequest* http_request,
                           HttpResponse* http_response) {
-  char* requiredParams[] = {"key", "db"};
+  char* requiredParams[] = {"id", "db"};
   QueryParams queries = validate_queries(http_request, requiredParams, 2);
   if (queries.invalid != NULL) {
     http_response->status = 400;
@@ -10,7 +10,7 @@ int handle_request_delete(HttpRequest* http_request,
     return 1;
   }
 
-  char* db_path = derive_path(3, "db", queries.db, queries.key);
+  char* db_path = derive_path(3, "db", queries.db, queries.id);
   if (db_path == NULL) {
     http_response->status = 400;
     s_set(&http_response->body, "Failed to derive path");

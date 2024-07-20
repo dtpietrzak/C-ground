@@ -2,7 +2,7 @@
 
 // Validate the queries in the HTTP request
 // If the queries are invalid, set the invalid message
-// If the queries are valid, set the key and / or db name
+// If the queries are valid, set the id and / or db name
 //
 // Returns the QueryParams struct
 // if the queries are invalid, the invalid field will be set (not NULL)
@@ -10,6 +10,7 @@ QueryParams validate_queries(HttpRequest* http_request, char* required_params[],
                              int num_required) {
   QueryParams queryParams = {
       .invalid = NULL,
+      .id = NULL,
       .key = NULL,
       .db = NULL,
   };
@@ -19,10 +20,14 @@ QueryParams validate_queries(HttpRequest* http_request, char* required_params[],
     return queryParams;
   }
 
+  bool id_is_required = false;
   bool key_is_required = false;
   bool db_is_required = false;
 
   for (int i = 0; i < http_request->num_queries; i++) {
+    if (strcmp(required_params[i], "id") == 0) {
+      id_is_required = true;
+    }
     if (strcmp(required_params[i], "key") == 0) {
       key_is_required = true;
     }
@@ -30,11 +35,25 @@ QueryParams validate_queries(HttpRequest* http_request, char* required_params[],
       db_is_required = true;
     }
 
+    if (!strcmp(http_request->queries[i][0], "id")) {
+      queryParams.id = http_request->queries[i][1];
+    }
     if (!strcmp(http_request->queries[i][0], "key")) {
       queryParams.key = http_request->queries[i][1];
     }
     if (!strcmp(http_request->queries[i][0], "db")) {
       queryParams.db = http_request->queries[i][1];
+    }
+  }
+
+  if (id_is_required) {
+    if (queryParams.id == NULL) {
+      queryParams.invalid = "Id is missing";
+      return queryParams;
+    } else if (contains_invalid_chars(queryParams.id,
+                                      INVALID_CHARS_DIRS_AND_FILES)) {
+      queryParams.invalid = "Id contains invalid characters";
+      return queryParams;
     }
   }
 
@@ -77,7 +96,7 @@ QueryParams validate_queries(HttpRequest* http_request, char* required_params[],
 // and set the response body to the error message
 //
 // Returns the file content if successful, NULL if not
-char* get_file_content(HttpResponse* http_response, char* relative_path,
+char* get_file_content(HttpResponse* http_response, const char* relative_path,
                        const char* error_message_404,
                        const char* error_message_500) {
   // Check if the file exists
@@ -132,7 +151,7 @@ JSON_Value* get_json_value(HttpResponse* http_response, char* string_to_parse,
 // Returns 1 if the file is updated and saved successfully
 // Returns -1 if there is an issue saving the file
 int save_string(HttpResponse* http_response, const char* string_to_save,
-                char* relative_path, const char* success_message_201,
+                const char* relative_path, const char* success_message_201,
                 const char* success_message_204, char* error_message_500) {
   int status = save_string_to_file(string_to_save, relative_path);
   switch (status) {
