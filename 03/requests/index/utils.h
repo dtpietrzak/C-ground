@@ -1,3 +1,6 @@
+#ifndef REQUESTS_INDEX_UTILS_H
+#define REQUESTS_INDEX_UTILS_H
+
 #include <errno.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -10,7 +13,6 @@
 #include "../../utils/parson.h"
 #include "../../utils/request_operations.h"
 #include "../../utils/utils.h"
-#include "utils.h"
 
 #ifdef _WIN32
 #include <direct.h>  // For Windows mkdir
@@ -20,5 +22,15 @@
 #include <sys/stat.h>  // For mkdir
 #endif
 
-int handle_request_index_upsert(HttpRequest* http_request,
-                                HttpResponse* http_response);
+typedef struct {
+  const JSON_Value* json_value;
+  const JSON_Array* array;
+  size_t count;
+} JSON_Array_With_Count;
+
+int get_json_array_with_count(HttpResponse* http_response,
+                              char* string_to_parse,
+                              JSON_Array_With_Count* json_array_with_count,
+                              char* error_identity);
+
+#endif  // REQUESTS_INDEX_UTILS_H

@@ -15,24 +15,9 @@ int handle_request_index_upsert(HttpRequest* http_request,
   const char* db_path = derive_path(2, "db", queries.db);
   const char* index_meta_path = derive_path(3, "index", queries.db, "_meta");
 
-  const JSON_Value* request_body_json_value =
-      get_json_value(http_response, http_request->body.value,
-                     "Failed to parse request JSON data");
-  if (request_body_json_value == NULL) return 1;
-
-  const JSON_Array* request_body_json_array =
-      json_value_get_array(request_body_json_value);
-  if (request_body_json_array == NULL) {
-    http_response->status = 400;
-    s_set(&http_response->body, "Request body must be an array");
-    return 1;
-  }
-
-  size_t request_body_array_count =
-      json_array_get_count(request_body_json_array);
-  if (request_body_array_count == 0) {
-    http_response->status = 400;
-    s_set(&http_response->body, "Request body array must not be empty");
+  JSON_Array_With_Count request_array_with_count;
+  if (get_json_array_with_count(http_response, http_request->body.value,
+                                &request_array_with_count, "request") != 0) {
     return 1;
   }
 
@@ -52,7 +37,8 @@ int handle_request_index_upsert(HttpRequest* http_request,
     }
     // Index meta file doesn't exist yet, no need to merge
     // just continue to saving the new index meta data
-    updated_json_value = json_value_deep_copy(request_body_json_value);
+    updated_json_value =
+        json_value_deep_copy(request_array_with_count.json_value);
   } else {
     // Index already exists, lets gooooooo!
     const JSON_Value* existing_meta_json_value =
@@ -72,10 +58,10 @@ int handle_request_index_upsert(HttpRequest* http_request,
         json_array_get_count(existing_meta_json_array);
 
     // add requested index items to the existing index meta data
-    for (size_t i = 0; i < request_body_array_count; i++) {
+    for (size_t i = 0; i < request_array_with_count.count; i++) {
       int already_exists = 0;
       const char* request_item =
-          json_array_get_string(request_body_json_array, i);
+          json_array_get_string(request_array_with_count.array, i);
       if (request_item == NULL) {
         http_response->status = 400;
         s_set(&http_response->body,
