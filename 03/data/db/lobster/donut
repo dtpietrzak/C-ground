@@ -1,5 +1,9 @@
 {
-    "colors": [],
+    "colors": [
+        "red",
+        "white",
+        "blue"
+    ],
     "flavors": [
         "chocolate",
         "vanilla",
