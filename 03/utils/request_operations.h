@@ -13,6 +13,7 @@ typedef struct {
   char* invalid;
   char* id;
   char* key;
+  char* value;
   char* db;
 } QueryParams;
 
@@ -27,7 +28,7 @@ JSON_Value* get_json_value(HttpResponse* http_response, char* string_to_parse,
                            char* error_message);
 
 int save_string(HttpResponse* http_response, const char* string_to_save,
-            const char* relative_path, const char* success_message_201,
-            const char* success_message_204, char* error_message_500);
+                const char* relative_path, const char* success_message_201,
+                const char* success_message_204, char* error_message_500);
 
 #endif  // UTILS_REQUESTS_H

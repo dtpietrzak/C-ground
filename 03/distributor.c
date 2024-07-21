@@ -4,6 +4,7 @@
 #include "requests/doc/doc.h"
 #include "requests/index/index_delete.h"
 #include "requests/index/index_upsert.h"
+#include "requests/query/query.h"
 #include "requests/schema/schema.h"
 #include "requests/upsert/upsert.h"
 
@@ -47,6 +48,11 @@ int endpoint(const char* path, const char* method,
 void handle_request(HttpRequest* http_request, HttpResponse* http_response) {
   if (endpoint("/doc", "GET", handle_request_doc,
                "Failed to get document: ", http_request, http_response)) {
+    return;
+  }
+
+  if (endpoint("/query", "GET", handle_request_query,
+               "Failed to query documents: ", http_request, http_response)) {
     return;
   }
 

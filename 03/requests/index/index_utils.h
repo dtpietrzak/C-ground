@@ -23,8 +23,8 @@
 #endif
 
 typedef struct {
-  const JSON_Value* json_value;
-  const JSON_Array* array;
+  JSON_Value* json_value;
+  JSON_Array* array;
   size_t count;
 } JSON_Array_With_Count;
 
@@ -32,5 +32,13 @@ int get_json_array_with_count(HttpResponse* http_response,
                               char* string_to_parse,
                               JSON_Array_With_Count* json_array_with_count,
                               char* error_identity);
+
+int insert_new_meta(HttpResponse* http_response,
+                    JSON_Array_With_Count request_array_with_count,
+                    JSON_Array_With_Count existing_meta_array_with_count);
+
+const char* get_document_dot_value_as_string(HttpResponse* http_response,
+                                             const char* file_path,
+                                             const char* key);
 
 #endif  // REQUESTS_INDEX_UTILS_H

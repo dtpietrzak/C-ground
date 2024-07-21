@@ -9,7 +9,7 @@
 #include "../../utils/parson.h"
 #include "../../utils/request_operations.h"
 #include "../../utils/utils.h"
-#include "utils.h"
+#include "upsert_utils.h"
 #include "compile_dot_notation.h"
 #include "compile_entire_doc.h"
 

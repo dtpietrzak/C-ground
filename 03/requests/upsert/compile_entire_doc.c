@@ -3,7 +3,7 @@
 int compile_doc_change(HttpResponse* http_response, HttpRequest* http_request,
                        char* db_path, QueryParams queries,
                        char* schema_file_content,
-                       JSON_Value* request_json_value) {
+                       const JSON_Value* request_json_value) {
   JSON_Value* schema_json =
       json_parse_string_with_comments(schema_file_content);
   if (schema_json == NULL) {
@@ -14,6 +14,12 @@ int compile_doc_change(HttpResponse* http_response, HttpRequest* http_request,
     return 1;
   }
   if (json_validate(schema_json, request_json_value) != JSONSuccess) {
+    http_response->status = 400;
+    s_compile(&http_response->body, "Invalid schema - Should be:\n%s\n",
+              schema_file_content);
+    return 1;
+  }
+  if (json_validate(request_json_value, schema_json) != JSONSuccess) {
     http_response->status = 400;
     s_compile(&http_response->body, "Invalid schema - Should be:\n%s\n",
               schema_file_content);

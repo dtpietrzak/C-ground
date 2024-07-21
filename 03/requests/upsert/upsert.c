@@ -4,6 +4,13 @@
 
 int handle_request_upsert(HttpRequest* http_request,
                           HttpResponse* http_response) {
+  if (contains_invalid_chars(http_request->body.value,
+                             INVALID_CHARS_REQUEST_BODY)) {
+    http_response->status = 400;
+    s_set(&http_response->body, "Invalid characters in request body");
+    return 1;
+  }
+
   char* requiredParams[] = {"id", "db"};
   QueryParams queries = validate_queries(http_request, requiredParams, 2);
   if (queries.invalid != NULL) {

@@ -10,7 +10,7 @@
 #include "../../utils/parson.h"
 #include "../../utils/request_operations.h"
 #include "../../utils/utils.h"
-#include "utils.h"
+#include "index_utils.h"
 
 #ifdef _WIN32
 #include <direct.h>  // For Windows mkdir

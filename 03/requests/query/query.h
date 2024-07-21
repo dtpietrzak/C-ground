@@ -18,7 +18,5 @@
 #include <sys/stat.h>  // For mkdir
 #endif
 
-int compile_doc_change(HttpResponse* http_response, HttpRequest* http_request,
-                       char* db_path, QueryParams queries,
-                       char* schema_file_content,
-                       const JSON_Value* request_json_value);
+int handle_request_query(HttpRequest* http_request,
+                         HttpResponse* http_response);

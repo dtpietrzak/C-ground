@@ -1,4 +1,4 @@
-#include "utils.h"
+#include "upsert_utils.h"
 
 char* get_schema_file_content(HttpResponse* http_response, char* schema_path,
                               char* db_path, QueryParams queries) {
