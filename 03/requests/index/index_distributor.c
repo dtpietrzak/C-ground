@@ -20,6 +20,21 @@ const char* index_distributor(HttpResponse* http_response,
 
       return document_dot_value;
     }
+    case JSONBoolean: {
+      // index the document
+      JSON_Value* json_value = json_object_get_value(json_object, key);
+      if (json_value == NULL) {
+        http_response->status = 500;
+        s_compile(
+            &http_response->body,
+            "Failed to get index value from document by key: '%s' - document "
+            "value for this key must be a boolean",
+            key);
+        return NULL;
+      }
+
+      return json_value_get_boolean(json_value) ? "true" : "false";
+    }
     default:
       http_response->status = 500;
       s_compile(
