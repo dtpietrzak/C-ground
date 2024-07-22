@@ -1,5 +1,55 @@
 #include "index_a_doc.h"
 
+const char* get_document_dot_value_as_string(HttpResponse* http_response,
+                                             const char* file_path,
+                                             const char* key) {
+  char* file_content =
+      get_file_content(http_response, file_path, "Document not found",
+                       "Failed to read a document to be indexed");
+  if (file_content == NULL) {
+    return NULL;
+  }
+
+  JSON_Value* file_json_value = json_parse_string_with_comments(file_content);
+  if (file_json_value == NULL) {
+    http_response->status = 500;
+    s_compile(&http_response->body,
+              "Failed to parse document JSON data to be indexed - %s key: %s",
+              file_path, key);
+    free(file_content);
+    return NULL;
+  }
+
+  const JSON_Object* file_json_object = json_value_get_object(file_json_value);
+  if (file_json_object == NULL) {
+    http_response->status = 500;
+    s_set(&http_response->body, "Document JSON data must be an object");
+    json_value_free(file_json_value);
+    free(file_content);
+    return NULL;
+  }
+
+  const JSON_Value* doc_json_value =
+      json_object_dotget_value(file_json_object, key);
+  JSON_Value_Type doc_json_type = json_value_get_type(doc_json_value);
+
+  // DISTRIBUTOR
+  // DISTRIBUTOR - START
+  // DISTRIBUTOR
+  const char* document_dot_value =
+      index_distributor(http_response, doc_json_type, file_json_object, key);
+  if (document_dot_value == NULL) {
+    json_value_free(file_json_value);
+    free(file_content);
+    return NULL;
+  }
+  // DISTRIBUTOR
+  // DISTRIBUTOR - END
+  // DISTRIBUTOR
+
+  return document_dot_value;
+}
+
 int index_a_doc(HttpResponse* http_response, const char* db_name,
                 const char* filename, const char* request_meta_string) {
   const char* file_path = derive_path(3, "db", db_name, filename);
