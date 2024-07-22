@@ -1,6 +1,7 @@
 #ifndef HTTP_H
 #define HTTP_H
 
+#include <ctype.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,5 +43,7 @@ void parse_http_request(const char *request_str, HttpRequest *request);
 void compile_http_response(HttpResponse *http_response, SString *response_str);
 void free_http_request(HttpRequest *request);
 void free_http_response(HttpResponse *http_response);
+char *url_encode(const char *str);
+char *url_decode(const char *str);
 
 #endif  // HTTP_H

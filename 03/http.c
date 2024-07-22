@@ -179,3 +179,58 @@ void validate_auth_header(const char *request_str,
 
   free(auth_header);
 }
+
+// url encoding function
+// https://www.urlencoder.io/learn/
+// https://www.w3schools.com/tags/ref_urlencode.ASP
+
+char *url_encode(const char *str) {
+  const char *pstr = str;
+  char *buf = (char *)malloc(strlen(str) * 3 + 1);
+  char *pbuf = buf;
+
+  if (buf == NULL) {
+    return NULL;  // Check for successful allocation
+  }
+
+  while (*pstr) {
+    if (isalnum((unsigned char)*pstr) || *pstr == '-' || *pstr == '_' ||
+        *pstr == '.' || *pstr == '~') {
+      *pbuf++ = *pstr;
+    } else if (*pstr == ' ') {
+      *pbuf++ = '+';
+    } else {
+      snprintf(pbuf, 4, "%%%02X", (unsigned char)*pstr);
+      pbuf += 3;
+    }
+    pstr++;
+  }
+  *pbuf = '\0';
+  return buf;
+}
+
+// url decoding function
+char *url_decode(const char *str) {
+  const char *pstr = str;
+  char *buf = (char *)malloc(strlen(str) + 1);
+  char *pbuf = buf;
+
+  if (buf == NULL) {
+    return NULL;  // Check for successful allocation
+  }
+
+  while (*pstr) {
+    if (*pstr == '+') {
+      *pbuf++ = ' ';
+    } else if (*pstr == '%' && isxdigit(pstr[1]) && isxdigit(pstr[2])) {
+      char hex[3] = {pstr[1], pstr[2], 0};
+      *pbuf++ = (char)strtol(hex, NULL, 16);
+      pstr += 2;
+    } else {
+      *pbuf++ = *pstr;
+    }
+    pstr++;
+  }
+  *pbuf = '\0';
+  return buf;
+}
