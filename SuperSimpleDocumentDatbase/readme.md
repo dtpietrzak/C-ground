@@ -1,6 +1,6 @@
 # _database
 
-A stupid simple document database of JSON documents
+A super simple document database of JSON documents
 
 ## Settings
 
@@ -34,10 +34,13 @@ settings.json
 
 ### POST /schema?db=desserts
 
+You create a database by defining a schema.
+
 request body:
 
 ``` json
 {
+    "inventor": "",
     "colors": [""],
     "flavors": [""],
     "size": {
@@ -49,10 +52,13 @@ request body:
 
 ### POST /upsert?db=desserts&id=cake
 
+You upsert some stuff into that database, the whole document at a time.
+
 request body:
 
 ``` json
 {
+    "inventor": "some ancient Egyptian dude",
     "colors": ["red", "white", "blue"],
     "flavors": ["chocolate", "vanilla", "strawberry"],
     "size": {
@@ -64,6 +70,8 @@ request body:
 
 ### POST /upsert?db=desserts&id=cake.colors
 
+Or upserting an update via JSON data's dot notation.
+
 request body:
 
 ``` json
@@ -72,13 +80,17 @@ request body:
 
 ### POST /upsert?db=desserts&id=cake.size.width
 
+Dot notation works as expected ad infinitum.
+
 request body:
 
 ``` json
 100
 ```
 
-### GET /docs?db=desserts&id=cake
+### GET /doc?db=desserts&id=cake
+
+You can get that whole doc directly by it's id.
 
 response body:
 
@@ -93,7 +105,9 @@ response body:
 }
 ```
 
-### GET /docs?db=desserts&id=cake.colors
+### GET /doc?db=desserts&id=cake.colors
+
+Or by dot notation.
 
 response body:
 
@@ -101,7 +115,9 @@ response body:
 ["red", "white", "blue"]
 ```
 
-### GET /docs?db=desserts&id=cake.size.width
+### GET /doc?db=desserts&id=cake.size.width
+
+Dot notation ad infinitum.
 
 response body:
 
@@ -110,3 +126,15 @@ response body:
 ```
 
 ### DELETE /delete?db=dessert&id=cake
+
+You can also remove documents. (The flagship feature!)
+
+### POST /index/upsert?db=desserts
+
+You can get a little more fancy with creating an index on a document property.
+
+request body:
+
+``` json
+["inventor"]
+```
