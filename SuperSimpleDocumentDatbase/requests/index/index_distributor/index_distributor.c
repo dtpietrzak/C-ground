@@ -18,7 +18,7 @@ const char* index_distributor(HttpResponse* http_response,
         return NULL;
       }
 
-      return document_dot_value;
+      return url_encode(document_dot_value);
     }
     case JSONBoolean: {
       // index the document
