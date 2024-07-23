@@ -1,8 +1,8 @@
 #ifndef REQUESTS_INDEX_META_HANDLERS_H
 #define REQUESTS_INDEX_META_HANDLERS_H
 
-#include "../../utils/parson.h"
-#include "../../utils/request_operations.h"
+#include "../../../utils/parson.h"
+#include "../../../utils/request_operations.h"
 #include "index_utils.h"
 
 typedef struct {
