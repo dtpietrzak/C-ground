@@ -22,7 +22,7 @@ const char* index_distributor(HttpResponse* http_response,
     }
     case JSONBoolean: {
       // index the document
-      JSON_Value* json_value = json_object_get_value(json_object, key);
+      const JSON_Value* json_value = json_object_get_value(json_object, key);
       if (json_value == NULL) {
         http_response->status = 500;
         s_compile(
@@ -34,6 +34,37 @@ const char* index_distributor(HttpResponse* http_response,
       }
 
       return json_value_get_boolean(json_value) ? "true" : "false";
+    }
+    case JSONNumber: {
+      // index the document
+      JSON_Value* json_value = json_object_get_value(json_object, key);
+      if (json_value == NULL) {
+        http_response->status = 500;
+        s_compile(
+            &http_response->body,
+            "Failed to get index value from document by key: '%s' - document "
+            "value for this key must be a number",
+            key);
+        return NULL;
+      }
+
+      const double number = json_value_get_number(json_value);
+      char temp_str[50];
+      intToStr(number, temp_str);
+
+      char* str = (char*)malloc((strlen(temp_str) + 1) * sizeof(char));
+      if (str == NULL) {
+        http_response->status = 500;
+        s_compile(
+            &http_response->body,
+            "Memory allocation failed for the string conversion of key: '%s'",
+            key);
+        return NULL;
+      }
+
+      strcpy(str, temp_str);
+
+      return str;
     }
     default:
       http_response->status = 500;

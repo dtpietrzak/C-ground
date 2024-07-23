@@ -71,3 +71,23 @@ int insert_new_meta(HttpResponse* http_response,
   }
   return 0;
 }
+
+void intToStr(int num, char* str) {
+  int i = 0, sign = num;
+
+  if (sign < 0) num = -num;
+
+  do {
+    str[i++] = num % 10 + '0';
+  } while ((num /= 10) > 0);
+
+  if (sign < 0) str[i++] = '-';
+  str[i] = '\0';
+
+  // Reverse the string
+  for (int j = 0, k = i - 1; j < k; j++, k--) {
+    char temp = str[j];
+    str[j] = str[k];
+    str[k] = temp;
+  }
+}

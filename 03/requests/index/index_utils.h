@@ -41,4 +41,6 @@ const char* get_document_dot_value_as_string(HttpResponse* http_response,
                                              const char* file_path,
                                              const char* key);
 
+void intToStr(int num, char* str);
+
 #endif  // REQUESTS_INDEX_UTILS_H
