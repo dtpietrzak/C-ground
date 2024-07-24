@@ -143,14 +143,9 @@ void handle_sigint(uv_signal_t *handle, int signum) {
   } else {
     printf("\nSIGINT received: %d\n", signum);
   }
-  uv_signal_stop(handle);  // Stop receiving further SIGINT signals
-  uv_stop(loop);           // Stop the event loop
-}
-
-// Function to initialize signal handling
-void setup_signal_handling() {
-  uv_signal_init(loop, &sigint);
-  uv_signal_start(&sigint, handle_sigint, SIGINT);
+  uv_signal_stop(handle);             // Stop receiving further SIGINT signals
+  uv_tcp_close_reset(&server, NULL);  // Close the server
+  uv_stop(loop);                      // Stop the event loop
 }
 
 int start_server(int port) {
@@ -169,7 +164,8 @@ int start_server(int port) {
 
   printf("\nListening on port %d\n", global_setting_port);
 
-  setup_signal_handling();
+  uv_signal_init(loop, &sigint);
+  uv_signal_start(&sigint, handle_sigint, SIGINT);
 
   uv_run(loop, UV_RUN_DEFAULT);
 

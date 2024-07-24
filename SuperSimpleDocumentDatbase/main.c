@@ -22,9 +22,9 @@ int main() {
     return 1;
   }
 
-  printf("\n\nServer closed on port %d\n", global_setting_port);
-
   free_settings();
+
+  printf("Server closed. Port %d is free.\n\n", global_setting_port);
 
   return 0;
 }
