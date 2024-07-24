@@ -63,16 +63,16 @@ int load_settings() {
         return 1;
       }
 
-      if (load_string_setting(settings_json, &global_setting_auth, "auth", 1024,
+      if (load_string_setting(settings_json, &global_setting_auth_ptr, "auth",
+                              1024, settings_file_path) != 0) {
+        return 1;
+      }
+      if (load_string_setting(settings_json, &global_setting_ip_ptr, "ip", 17,
                               settings_file_path) != 0) {
         return 1;
       }
-      if (load_string_setting(settings_json, &global_setting_ip, "ip", 17,
-                              settings_file_path) != 0) {
-        return 1;
-      }
-      if (load_string_setting(settings_json, &global_setting_path, "path", 1024,
-                              settings_file_path) != 0) {
+      if (load_string_setting(settings_json, &global_setting_path_ptr, "path",
+                              1024, settings_file_path) != 0) {
         return 1;
       }
 
@@ -90,16 +90,16 @@ int load_settings() {
       global_setting_port = DEFAULT_PORT;
 
       int auth_length = strlen(DEFAULT_AUTH);
-      global_setting_auth = (char*)malloc(auth_length);
-      strncpy(global_setting_auth, DEFAULT_AUTH, auth_length);
+      global_setting_auth_ptr = (char*)malloc(auth_length);
+      strncpy(global_setting_auth_ptr, DEFAULT_AUTH, auth_length);
 
       int ip_length = strlen(DEFAULT_IP);
-      global_setting_ip = (char*)malloc(ip_length);
-      strncpy(global_setting_ip, DEFAULT_IP, ip_length);
+      global_setting_ip_ptr = (char*)malloc(ip_length);
+      strncpy(global_setting_ip_ptr, DEFAULT_IP, ip_length);
 
       int path_length = strlen(DEFAULT_PATH);
-      global_setting_path = (char*)malloc(path_length);
-      strncpy(global_setting_path, DEFAULT_PATH, path_length);
+      global_setting_path_ptr = (char*)malloc(path_length);
+      strncpy(global_setting_path_ptr, DEFAULT_PATH, path_length);
 
       char default_settings_str[1024];
       snprintf(default_settings_str, sizeof(default_settings_str),
@@ -110,9 +110,9 @@ int load_settings() {
 
       printf("\ndefaults: \n");
       printf("  port: %hd\n", global_setting_port);
-      printf("  auth: %s\n", global_setting_auth);
-      printf("  ip: %s\n", global_setting_ip);
-      printf("  path: %s\n\n", global_setting_path);
+      printf("  auth: %s\n", global_setting_auth_ptr);
+      printf("  ip: %s\n", global_setting_ip_ptr);
+      printf("  path: %s\n\n", global_setting_path_ptr);
 
       return 0;
     } else {
@@ -125,10 +125,13 @@ int load_settings() {
 }
 
 void free_settings() {
-  if (global_setting_ip != NULL) {
-    free(global_setting_ip);
+  if (global_setting_auth_ptr != NULL) {
+    free(global_setting_auth_ptr);
   }
-  if (global_setting_path != NULL) {
-    free(global_setting_path);
+  if (global_setting_ip_ptr != NULL) {
+    free(global_setting_ip_ptr);
+  }
+  if (global_setting_path_ptr != NULL) {
+    free(global_setting_path_ptr);
   }
 }

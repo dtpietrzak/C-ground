@@ -46,7 +46,8 @@ request body:
     "size": {
         "width": 0,
         "height": 0
-    }
+    },
+    "rating": 0,
 }
 ```
 
@@ -64,7 +65,8 @@ request body:
     "size": {
         "width": 100,
         "height": 200
-    }
+    },
+    "rating": 10,
 }
 ```
 
@@ -101,7 +103,8 @@ response body:
     "size": {
         "width": 100,
         "height": 200
-    }
+    },
+    "rating": 10,
 }
 ```
 
@@ -131,10 +134,32 @@ You can also remove documents. (The flagship feature!)
 
 ### POST /index/upsert?db=desserts
 
-You can get a little more fancy with creating an index on a document property.
+You can get a little more fancy with creating indexes on document properties.
 
 request body:
 
 ``` json
-["inventor"]
+["inventor", "rating"]
+```
+
+### GET /find?db=desserts&key=rating&value=10
+
+Which you can then find directly by property and value.
+
+request body:
+
+``` json
+[
+  {
+    "cake": {
+      "colors": ["red", "white", "blue"],
+      "flavors": ["chocolate", "vanilla", "strawberry"],
+      "size": {
+          "width": 100,
+          "height": 200
+      },
+      "rating": 10,
+    }
+  }
+]
 ```

@@ -22,6 +22,8 @@ int main() {
     return 1;
   }
 
+  printf("\n\nServer closed on port %d\n", global_setting_port);
+
   free_settings();
 
   return 0;

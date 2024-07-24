@@ -167,7 +167,7 @@ void validate_auth_header(const char *request_str,
     http_response->status = 401;
     s_set(&http_response->body,
           "\"Authorization header not found or invalid format\"");
-  } else if (strcmp(auth_header, global_setting_auth)) {
+  } else if (strcmp(auth_header, global_setting_auth_ptr)) {
     http_response->status = 401;
     s_set(&http_response->body, "\"Invalid authentication\"");
   } else if (auth_len < REQUIRED_AUTH_LENGTH) {

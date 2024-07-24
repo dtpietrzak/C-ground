@@ -94,7 +94,7 @@ int validate_tcp_ip(const uv_tcp_t *client) {
       uv_ip6_name((struct sockaddr_in6 *)&peername, ip, 16);
     }
 
-    if (strncmp(global_setting_ip, ip, 18) == 0) {
+    if (strncmp(global_setting_ip_ptr, ip, 18) == 0) {
       return 0;
     } else {
       fprintf(stderr, "Client attempted illegal connection from IP: %s\n", ip);
@@ -129,10 +129,32 @@ void on_connection(uv_stream_t *server, int status) {
   }
 }
 
-int start_server(int port) {
-  uv_tcp_t server;
-  uv_loop_t *loop = uv_default_loop();
+uv_tcp_t server;
+uv_loop_t *loop;
+uv_signal_t sigint;
 
+volatile sig_atomic_t stop_server = 0;
+
+// Signal handler function
+void handle_sigint(uv_signal_t *handle, int signum) {
+  stop_server = 1;
+  if (signum == SIGINT) {
+    printf("\nClosing the server...\n");
+  } else {
+    printf("\nSIGINT received: %d\n", signum);
+  }
+  uv_signal_stop(handle);  // Stop receiving further SIGINT signals
+  uv_stop(loop);           // Stop the event loop
+}
+
+// Function to initialize signal handling
+void setup_signal_handling() {
+  uv_signal_init(loop, &sigint);
+  uv_signal_start(&sigint, handle_sigint, SIGINT);
+}
+
+int start_server(int port) {
+  loop = uv_default_loop();
   uv_tcp_init(loop, &server);
 
   struct sockaddr_in bind_addr;
@@ -146,6 +168,9 @@ int start_server(int port) {
   }
 
   printf("\nListening on port %d\n", global_setting_port);
+
+  setup_signal_handling();
+
   uv_run(loop, UV_RUN_DEFAULT);
 
   return 0;
