@@ -9,7 +9,7 @@
 #include <uv.h>
 
 #include "distributor.h"
-#include "http.h"
+#include "utils/http.h"
 #include "utils/sstring.h"
 #include "utils/utils.h"
 

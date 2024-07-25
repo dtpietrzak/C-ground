@@ -4,7 +4,7 @@
 #include <uv.h>
 
 #include "global.c"
-#include "server.h"
+#include "http_server.h"
 #include "utils/settings.h"
 #include "utils/sstring.h"
 #include "utils/utils.h"

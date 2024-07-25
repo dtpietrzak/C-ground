@@ -6,9 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "global.c"
-#include "utils/sstring.h"
-#include "utils/utils.h"
+#include "../global.c"
+#include "sstring.h"
+#include "utils.h"
 
 #define MAX_REQ_METHOD_SIZE 8
 #define MAX_REQ_PATH_SIZE 1024

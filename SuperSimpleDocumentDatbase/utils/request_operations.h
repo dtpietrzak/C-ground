@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <string.h>
 
-#include "../http.h"
+#include "http.h"
 #include "file_operations.h"
 #include "parson.h"
 #include "utils.h"
