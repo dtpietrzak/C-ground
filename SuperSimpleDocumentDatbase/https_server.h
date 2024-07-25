@@ -8,10 +8,10 @@
 #include <string.h>
 #include <uv.h>
 
+#include "process_request.h"
 #include "utils/http.h"
 #include "utils/sstring.h"
 #include "utils/utils.h"
-#include "process_request.h"
 
 #define MAX_RES_SIZE 65535
 #define MAX_REQ_SIZE 65535

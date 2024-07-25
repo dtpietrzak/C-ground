@@ -1,5 +1,4 @@
-#include "distributor.h"
-
+#include "process_request.h"
 #include "requests/delete/delete.h"
 #include "requests/doc/doc.h"
 #include "requests/find/find.h"
@@ -90,4 +89,39 @@ void handle_request(HttpRequest* http_request, HttpResponse* http_response) {
   http_response->status = 404;
   s_set(&http_response->body, "\"Endpoint not found\"");
   return;
+}
+
+void process_request(const char* request_str, SString* response_str) {
+  // start response
+  HttpResponse http_response;
+  s_init(&http_response.body, "", MAX_RES_SIZE);
+
+  if (request_str == NULL) {
+    http_response.status = 400;
+    s_set(&http_response.body, "Empty request");
+  } else if (strlen(request_str) > MAX_REQ_SIZE) {
+    http_response.status = 400;
+    s_set(&http_response.body, "Request too large");
+  } else {
+    validate_auth_header(request_str, &http_response);
+    if (http_response.status != 401) {
+      // start request
+      HttpRequest http_request;
+      // Initialize request struct
+      memset(&http_request, 0, sizeof(HttpRequest));
+      s_init(&http_request.body, "", MAX_REQ_BODY_SIZE);
+      // parse request string into request struct
+      parse_http_request(request_str, &http_request);
+      // handle the request
+      handle_request(&http_request, &http_response);
+      free_http_request(&http_request);
+      // end request
+    }
+  }
+
+  // compile http_request into the request string
+  compile_http_response(&http_response, response_str);
+
+  free_http_response(&http_response);
+  // end response
 }
