@@ -8,11 +8,14 @@
 // if the queries are invalid, the invalid field will be set (not NULL)
 QueryParams validate_queries(HttpRequest* http_request, char* required_params[],
                              int num_required) {
+  // this is getting too large and should be refactored
+
   QueryParams queryParams = {
       .invalid = NULL,
       .id = NULL,
       .key = NULL,
       .value = NULL,
+      .query = NULL,
       .db = NULL,
   };
 
@@ -24,6 +27,7 @@ QueryParams validate_queries(HttpRequest* http_request, char* required_params[],
   bool id_is_required = false;
   bool key_is_required = false;
   bool value_is_required = false;
+  bool query_is_required = false;
   bool db_is_required = false;
 
   for (int i = 0; i < http_request->num_queries; i++) {
@@ -35,6 +39,9 @@ QueryParams validate_queries(HttpRequest* http_request, char* required_params[],
     }
     if (strcmp(required_params[i], "value") == 0) {
       value_is_required = true;
+    }
+    if (strcmp(required_params[i], "query") == 0) {
+      query_is_required = true;
     }
     if (strcmp(required_params[i], "db") == 0) {
       db_is_required = true;
@@ -48,6 +55,9 @@ QueryParams validate_queries(HttpRequest* http_request, char* required_params[],
     }
     if (!strcmp(http_request->queries[i][0], "value")) {
       queryParams.value = http_request->queries[i][1];
+    }
+    if (!strcmp(http_request->queries[i][0], "query")) {
+      queryParams.query = http_request->queries[i][1];
     }
     if (!strcmp(http_request->queries[i][0], "db")) {
       queryParams.db = http_request->queries[i][1];
@@ -83,6 +93,27 @@ QueryParams validate_queries(HttpRequest* http_request, char* required_params[],
     } else if (contains_invalid_chars(queryParams.value,
                                       INVALID_CHARS_DIRS_AND_FILES)) {
       queryParams.invalid = "Value contains invalid characters";
+      return queryParams;
+    }
+  }
+
+  if (query_is_required) {
+    if (queryParams.query == NULL) {
+      queryParams.invalid = "Query is missing";
+      return queryParams;
+    } else if (contains_invalid_chars(queryParams.query,
+                                      INVALID_CHARS_DIRS_AND_FILES)) {
+      queryParams.invalid = "Query contains invalid characters";
+      return queryParams;
+    } else if (
+        // strcmp(queryParams.query, "new") != 0 &&
+        // strcmp(queryParams.query, "old") != 0 &&
+        strcmp(queryParams.query, "gtr") != 0  // &&
+        // strcmp(queryParams.query, "les") != 0 &&
+        // strcmp(queryParams.query, "gtre") != 0 &&
+        // strcmp(queryParams.query, "lese") != 0
+    ) {
+      queryParams.invalid = "Query is invalid";
       return queryParams;
     }
   }

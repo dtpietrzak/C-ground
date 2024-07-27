@@ -14,6 +14,7 @@ typedef struct {
   char* id;
   char* key;
   char* value;
+  char* query;
   char* db;
 } QueryParams;
 
