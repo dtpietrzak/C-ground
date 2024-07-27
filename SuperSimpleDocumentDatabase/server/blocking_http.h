@@ -6,3 +6,8 @@
 #include <string.h>
 #include <sys/socket.h>
 #include <unistd.h>
+
+#include "../process_request.h"
+#include "../utils/sstring.h"
+
+int start_server_blocking_http(int port);

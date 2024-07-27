@@ -6,5 +6,5 @@
   "path_for_crt": "./server.crt",
   "path_for_key": "./server.key",
   "server_algorithm": "blocking", // "blocking" or "event loop"
-  "server_protocol": "http" // "http" or "https"
+  "server_protocol": "https" // "http" or "https"
 }

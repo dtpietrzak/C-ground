@@ -26,12 +26,12 @@ int main() {
 
   switch (global_server_type) {
     case 11:
+      result = start_server_blocking_http(global_setting_port);
       printf("Server type: %d (blocking, http)\n", global_server_type);
-      printf("Sorry, this setup has not been implemented yet.\n");
       break;
     case 12:
+      result = start_server_blocking_https(global_setting_port);
       printf("Server type: %d (blocking, https)\n", global_server_type);
-      printf("Sorry, this setup has not been implemented yet.\n");
       break;
     case 21:
       result = start_server_event_loop_http(global_setting_port);

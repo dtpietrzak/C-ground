@@ -1,5 +1,6 @@
-#include "../global.c"
 #include "event_loop_http.h"
+
+#include "../global.c"
 
 void on_alloc_buffer(uv_handle_t *handle, size_t suggested_size,
                      uv_buf_t *buf) {

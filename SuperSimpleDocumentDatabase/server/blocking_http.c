@@ -1,5 +1,7 @@
 #include "blocking_http.h"
 
+#include "../global.c"
+
 int server_fd;
 
 void handle_signal(int signal) {
@@ -59,16 +61,22 @@ int start_server_blocking_http(int port) {
     }
 
     buffer[len] = '\0';
-    printf("Received: %s\n", buffer);
 
-    // Send a basic HTTP response
-    const char *response =
-        "HTTP/1.1 200 OK\r\n"
-        "Content-Type: text/plain\r\n"
-        "Content-Length: 13\r\n"
-        "\r\n"
-        "Hello, world!";
-    write(client_fd, response, strlen(response));
+    printf("Request: %s\n", buffer);
+
+    // start response_body
+    SString response_str;
+    s_init(&response_str, "", global_max_res_size);
+
+    // Process the received data
+    process_request(buffer, &response_str);
+
+    if (response_str.value != NULL) {
+      printf("Response:\n%s\n\n\n", response_str.value);
+      write(client_fd, response_str.value, response_str.length);
+    } else {
+      printf("Failed to process request.\n");
+    }
 
     close(client_fd);
   }
