@@ -1,9 +1,9 @@
-#include "http_server.h"
-
-#include "global.c"
+#include "../global.c"
+#include "event_loop_http.h"
 
 void on_alloc_buffer(uv_handle_t *handle, size_t suggested_size,
                      uv_buf_t *buf) {
+  printf("Allocating buffer of size %zu\n", suggested_size);
   buf->base = (char *)malloc(suggested_size);
   buf->len = suggested_size;
   if (buf->base) {
@@ -17,7 +17,7 @@ void on_read(uv_stream_t *client_stream, ssize_t nread, const uv_buf_t *buf) {
 
     // start response_body
     SString response_str;
-    s_init(&response_str, "", MAX_RES_SIZE);
+    s_init(&response_str, "", global_max_res_size);
 
     // Process the received data
     process_request(buf->base, &response_str);
@@ -113,7 +113,7 @@ void handle_sigint(uv_signal_t *handle, int signum) {
   uv_stop(loop);                      // Stop the event loop
 }
 
-int start_server(int port) {
+int start_server_event_loop_http(int port) {
   loop = uv_default_loop();
   uv_tcp_init(loop, &server);
 

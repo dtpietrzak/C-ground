@@ -10,7 +10,7 @@
 
 char* derive_path(int num_args, ...) {
   // Start with the base path length
-  size_t length = strlen(global_setting_path_ptr) + 5;  // "data/" + null terminator
+  size_t length = strlen(global_setting_path_for_data_ptr) + 5;  // "data/" + null terminator
   va_list args;
   va_start(args, num_args);
 
@@ -34,7 +34,7 @@ char* derive_path(int num_args, ...) {
   }
 
   // Construct the path
-  strcpy(relative_path, global_setting_path_ptr);
+  strcpy(relative_path, global_setting_path_for_data_ptr);
   strcat(relative_path, "data");
   strcat(relative_path, PATH_SEPARATOR);
 

@@ -2,5 +2,9 @@
   "port": 7777,
   "auth": "CHANGE_THIS_CHANGE_THIS_CHANGE_THIS_CHANGE_THIS_CHANGE_THIS",
   "ip": "127.0.0.1",
-  "path": "./"
+  "path_for_data": "./",
+  "path_for_crt": "./server.crt",
+  "path_for_key": "./server.key",
+  "server_algorithm": "blocking", // "blocking" or "event loop"
+  "server_protocol": "http" // "http" or "https"
 }
