@@ -1,13 +1,13 @@
-#include "process_request.h"
+#include "request_distributor.h"
 
-#include "requests/delete/delete.h"
-#include "requests/doc/doc.h"
-#include "requests/find/find.h"
-#include "requests/index/index_delete.h"
-#include "requests/index/index_upsert.h"
-#include "requests/query/query.h"
-#include "requests/schema/schema.h"
-#include "requests/upsert/upsert.h"
+#include "../delete/delete.h"
+#include "../doc/doc.h"
+#include "../find/find.h"
+#include "../index/index_delete.h"
+#include "../index/index_upsert.h"
+#include "../query/_query_distributor/query_distributor.h"
+#include "../schema/schema.h"
+#include "../upsert/upsert.h"
 
 // distributor handles the incoming request and routes it to the correct handler
 // if there is a routing error it handles the status code and body
@@ -46,7 +46,8 @@ int endpoint(const char* path, const char* method,
   return 0;
 }
 
-void handle_request(HttpRequest* http_request, HttpResponse* http_response) {
+void distribute_request(HttpRequest* http_request,
+                        HttpResponse* http_response) {
   if (endpoint("/query", "GET", handle_request_query,
                "Failed to query documents: ", http_request, http_response)) {
     return;
@@ -92,7 +93,7 @@ void handle_request(HttpRequest* http_request, HttpResponse* http_response) {
   return;
 }
 
-void process_request(const char* request_str, SString* response_str) {
+void handle_request(const char* request_str, SString* response_str) {
   // start response
   HttpResponse http_response;
   s_init(&http_response.body, "", MAX_RES_SIZE);
@@ -114,7 +115,7 @@ void process_request(const char* request_str, SString* response_str) {
       // parse request string into request struct
       parse_http_request(request_str, &http_request);
       // handle the request
-      handle_request(&http_request, &http_response);
+      distribute_request(&http_request, &http_response);
       free_http_request(&http_request);
       // end request
     }

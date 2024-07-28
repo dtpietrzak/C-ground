@@ -21,7 +21,7 @@ void on_read(uv_stream_t *client_stream, ssize_t nread, const uv_buf_t *buf) {
     s_init(&response_str, "", global_max_res_size);
 
     // Process the received data
-    process_request(buf->base, &response_str);
+    handle_request(buf->base, &response_str);
 
     // Free buffer allocated by on_alloc_buffer
     if (buf->base) {

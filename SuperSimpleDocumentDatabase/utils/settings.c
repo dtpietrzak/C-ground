@@ -5,8 +5,8 @@
   "CHANGE_THIS_CHANGE_THIS_CHANGE_THIS_CHANGE_THIS_CHANGE_THIS"
 #define DEFAULT_IP "127.0.0.1"
 #define DEFAULT_PATH_DATA "./"
-#define DEFAULT_PATH_CRT "./server.crt"
-#define DEFAULT_PATH_KEY "./server.key"
+#define DEFAULT_PATH_CRT "./certs/server.crt"
+#define DEFAULT_PATH_KEY "./certs/server.key"
 #define DEFAULT_SERVER_ALGORITHM "blocking"
 #define DEFAULT_SERVER_PROTOCOL "http"
 

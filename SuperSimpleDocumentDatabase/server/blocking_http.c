@@ -69,7 +69,7 @@ int start_server_blocking_http(int port) {
     s_init(&response_str, "", global_max_res_size);
 
     // Process the received data
-    process_request(buffer, &response_str);
+    handle_request(buffer, &response_str);
 
     if (response_str.value != NULL) {
       printf("Response:\n%s\n\n\n", response_str.value);

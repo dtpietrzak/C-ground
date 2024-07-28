@@ -17,7 +17,7 @@ void handle(SSL *ssl) {
   s_init(&response_str, "", global_max_res_size);
 
   // Process the received data
-  process_request(buffer, &response_str);
+  handle_request(buffer, &response_str);
 
   if (response_str.value != NULL) {
     printf("Response:\n%s\n\n\n", response_str.value);

@@ -1,4 +1,4 @@
-#include "query.h"
+#include "query_distributor.h"
 
 #define MAX_PATH_LENGTH 1024
 
