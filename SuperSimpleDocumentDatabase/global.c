@@ -13,4 +13,3 @@ char *global_setting_server_protocol_ptr;
 int16_t global_setting_port;
 int global_max_req_size;
 int global_max_res_size;
-int global_server_type; // 11, 12, 21, 22

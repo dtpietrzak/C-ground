@@ -201,23 +201,7 @@ int load_settings() {
       return 1;
     }
   }
-
-  global_server_type = 0;
-
-  if (strcmp(global_setting_server_algorithm_ptr, "blocking") == 0) {
-    if (strcmp(global_setting_server_protocol_ptr, "http") == 0) {
-      global_server_type = 11;
-    } else if (strcmp(global_setting_server_protocol_ptr, "https") == 0) {
-      global_server_type = 12;
-    }
-  } else if (strcmp(global_setting_server_algorithm_ptr, "event loop") == 0) {
-    if (strcmp(global_setting_server_protocol_ptr, "http") == 0) {
-      global_server_type = 21;
-    } else if (strcmp(global_setting_server_protocol_ptr, "https") == 0) {
-      global_server_type = 22;
-    }
-  }
-
+  printf("Settings loaded.\n");
   return 0;
 }
 

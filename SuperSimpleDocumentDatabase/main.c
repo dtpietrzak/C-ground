@@ -4,7 +4,7 @@
 #include <uv.h>
 
 #include "global.c"
-#include "server/server.h"
+#include "server/_server_distributor/server_distributor.h"
 #include "utils/settings.h"
 #include "utils/sstring.h"
 #include "utils/utils.h"
@@ -20,33 +20,8 @@ int main() {
     return 1;
   }
 
-  printf("Settings loaded.\n");
-
-  int result = -1;
-
-  switch (global_server_type) {
-    case 11:
-      result = start_server_blocking_http(global_setting_port);
-      printf("Server type: %d (blocking, http)\n", global_server_type);
-      break;
-    case 12:
-      result = start_server_blocking_https(global_setting_port);
-      printf("Server type: %d (blocking, https)\n", global_server_type);
-      break;
-    case 21:
-      result = start_server_event_loop_http(global_setting_port);
-      printf("Server type: %d (event loop, http)\n", global_server_type);
-      break;
-    case 22:
-      printf("Server type: %d (event loop, https)\n", global_server_type);
-      printf("Sorry, this setup has not been implemented yet.\n");
-      break;
-    default:
-      printf("Server type: %d (unknown)\n", global_server_type);
-      return 1;
-  }
-
-  if (result != 0) {
+  int server_result = run_server();
+  if (server_result != 0) {
     fprintf(stderr, "Failed to start the server.\n");
     return 1;
   }
