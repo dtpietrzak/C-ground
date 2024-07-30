@@ -42,16 +42,19 @@ int handle_request_schema(sdb_http_request_t* http_request,
   int status = save_string_to_file(http_request->body.value, schema_path);
   switch (status) {
     case -1: {
-      // Check if the file exists
-      char* file_access_issue = check_file_access(schema_path, -2);
-      if (file_access_issue != NULL) {
-        http_response->status = 500;
-        s_compile(&http_response->body, "%s: %s", file_access_issue,
-                  schema_path);
+      // Check for file write access
+      sdb_stater_t* stater_write_access = calloc(1, sizeof(sdb_stater_t));
+      stater_write_access->error_body =
+          "Schema document does not have write permissions";
+      stater_write_access->error_status = 500;
+      if (!fs_file_access_sync(http_response, schema_path, stater_write_access,
+                               W_OK)) {
         return 1;
       }
       http_response->status = 500;
-      s_compile(&http_response->body, "%s", schema_path);
+      s_compile(&http_response->body,
+                "An unknown schema file write error has occured: %s",
+                schema_path);
       return 1;
     }
     case 0:
@@ -65,16 +68,18 @@ int handle_request_schema(sdb_http_request_t* http_request,
                 schema_path);
       return 0;
     default: {
-      // Check if the file exists
-      char* file_access_issue = check_file_access(schema_path, -2);
-      if (file_access_issue != NULL) {
-        http_response->status = 500;
-        s_compile(&http_response->body, "%s: %s", file_access_issue,
-                  schema_path);
+      // Check for file write access
+      sdb_stater_t* stater_write_access = calloc(1, sizeof(sdb_stater_t));
+      stater_write_access->error_body =
+          "Schema document does not have write permissions";
+      stater_write_access->error_status = 500;
+      if (!fs_file_access_sync(http_response, schema_path, stater_write_access,
+                               W_OK)) {
         return 1;
       }
       http_response->status = 500;
-      s_compile(&http_response->body, "An unknown error occurred: %s",
+      s_compile(&http_response->body,
+                "An unknown schema file write error has occured: %s",
                 schema_path);
       return 1;
     }

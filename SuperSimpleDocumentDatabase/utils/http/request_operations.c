@@ -11,15 +11,21 @@ char* get_file_content(sdb_http_response_t* http_response,
                        const char* relative_path, const char* error_message_404,
                        const char* error_message_500) {
   // Check if the file exists
-  const char* schema_file_access_issue = check_file_access(relative_path, 1);
-  if (schema_file_access_issue != NULL) {
-    if (strcmp(schema_file_access_issue, "Document does not exist") == 0) {
-      http_response->status = 404;
-      s_set(&http_response->body, error_message_404);
-    } else {
-      http_response->status = 500;
-      s_compile(&http_response->body, error_message_500);
-    }
+  sdb_stater_t* stater_doc_exists = calloc(1, sizeof(sdb_stater_t));
+  stater_doc_exists->error_body = "Requested document does not exist";
+  stater_doc_exists->error_status = 404;
+  if (!fs_file_access_sync(http_response, relative_path, stater_doc_exists,
+                           F_OK)) {
+    return NULL;
+  }
+
+  // Check if the file is readable
+  sdb_stater_t* stater_read_access = calloc(1, sizeof(sdb_stater_t));
+  stater_read_access->error_body =
+      "Requested document does not have read permissions";
+  stater_read_access->error_status = 500;
+  if (!fs_file_access_sync(http_response, relative_path, stater_read_access,
+                           R_OK)) {
     return NULL;
   }
 
@@ -67,14 +73,14 @@ int save_string(sdb_http_response_t* http_response, const char* string_to_save,
   int status = save_string_to_file(string_to_save, relative_path);
   switch (status) {
     case -1: {
-      // Check if the file exists
-      const char* file_access_issue = check_file_access(relative_path, -2);
-      if (file_access_issue != NULL) {
-        http_response->status = 500;
-        strcat(error_message_500, " - ");
-        strcat(error_message_500, file_access_issue);
-        s_set(&http_response->body, error_message_500);
-        return -1;
+      // Check for file write access
+      sdb_stater_t* stater_write_access = calloc(1, sizeof(sdb_stater_t));
+      strcat(error_message_500, " - Document does not have write permissions");
+      stater_write_access->error_body = error_message_500;
+      stater_write_access->error_status = 500;
+      if (!fs_file_access_sync(http_response, relative_path,
+                               stater_write_access, W_OK)) {
+        return 1;
       }
       http_response->status = 500;
       s_set(&http_response->body, error_message_500);
@@ -89,14 +95,14 @@ int save_string(sdb_http_response_t* http_response, const char* string_to_save,
       s_set(&http_response->body, success_message_204);
       return 1;
     default: {
-      // Check if the file exists
-      char* file_access_issue = check_file_access(relative_path, -2);
-      if (file_access_issue != NULL) {
-        http_response->status = 500;
-        strcat(error_message_500, " - ");
-        strcat(error_message_500, file_access_issue);
-        s_set(&http_response->body, error_message_500);
-        return -1;
+      // Check for file write access
+      sdb_stater_t* stater_write_access = calloc(1, sizeof(sdb_stater_t));
+      strcat(error_message_500, " - Document does not have write permissions");
+      stater_write_access->error_body = error_message_500;
+      stater_write_access->error_status = 500;
+      if (!fs_file_access_sync(http_response, relative_path,
+                               stater_write_access, W_OK)) {
+        return 1;
       }
       http_response->status = 500;
       s_set(&http_response->body, "An unknown error occurred");

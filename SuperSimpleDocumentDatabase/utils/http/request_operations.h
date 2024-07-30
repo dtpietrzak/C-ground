@@ -4,6 +4,7 @@
 #include <stdbool.h>
 #include <string.h>
 
+#include "../fs/access.h"
 #include "../fs/file_operations.h"
 #include "../libs/parson.h"
 #include "../request_state/request_state.h"

@@ -2,17 +2,22 @@
 
 int compile_dot_notation_change(sdb_http_response_t* http_response,
                                 sdb_http_request_t* http_request, char* db_path,
-                                sdb_query_params_t queries, char* schema_file_content,
+                                sdb_query_params_t queries,
+                                char* schema_file_content,
                                 JSON_Value* request_json_value) {
   // Check if the file exists
-  char* file_access_issue = check_file_access(db_path, 1);
-  if (file_access_issue != NULL) {
-    if (strcmp(file_access_issue, "Document does not exist") == 0) {
-      http_response->status = 404;
-    } else {
-      http_response->status = 500;
-    }
-    s_compile(&http_response->body, "%s: %s", file_access_issue, db_path);
+  sdb_stater_t* stater_doc_exists = calloc(1, sizeof(sdb_stater_t));
+  stater_doc_exists->error_body = "Document does not exist";
+  stater_doc_exists->error_status = 404;
+  if (!fs_file_access_sync(http_response, db_path, stater_doc_exists, F_OK)) {
+    return 1;
+  }
+
+  // Check if the file is readable
+  sdb_stater_t* stater_read_access = calloc(1, sizeof(sdb_stater_t));
+  stater_read_access->error_body = "Document does not have read permissions";
+  stater_read_access->error_status = 500;
+  if (!fs_file_access_sync(http_response, db_path, stater_read_access, R_OK)) {
     return 1;
   }
 
@@ -76,8 +81,7 @@ int compile_dot_notation_change(sdb_http_response_t* http_response,
       json_object_dotget_value(document_json_object, json_id);
   if (document_value == NULL) {
     http_response->status = 404;
-    s_compile(&http_response->body, "id not found in document: %s",
-              queries.id);
+    s_compile(&http_response->body, "id not found in document: %s", queries.id);
     return 1;
   }
 

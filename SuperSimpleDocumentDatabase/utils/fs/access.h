@@ -10,7 +10,7 @@
 #include "../http/http.h"
 #include "../request_state/request_state.h"
 
-bool fs_file_exists_sync(sdb_http_response_t* http_response,
-                         const char* file_path, sdb_stater_t* stater);
+bool fs_file_access_sync(sdb_http_response_t* http_response,
+                         const char* file_path, sdb_stater_t* stater, int mode);
 
 #endif  // FS_ACCESS_H

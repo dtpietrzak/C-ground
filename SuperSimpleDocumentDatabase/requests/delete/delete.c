@@ -20,14 +20,10 @@ int handle_request_delete(sdb_http_request_t* http_request,
   }
 
   // Check if the file exists
-  char* file_access_issue = check_file_access(db_path, 1);
-  if (file_access_issue != NULL) {
-    if (strcmp(file_access_issue, "Document does not exist") == 0) {
-      http_response->status = 404;
-    } else {
-      http_response->status = 500;
-    }
-    s_compile(&http_response->body, "%s: %s", file_access_issue, db_path);
+  sdb_stater_t* stater_doc_exists = calloc(1, sizeof(sdb_stater_t));
+  stater_doc_exists->error_body = "Requested document does not exist";
+  stater_doc_exists->error_status = 404;
+  if (!fs_file_access_sync(http_response, db_path, stater_doc_exists, F_OK)) {
     return 1;
   }
 

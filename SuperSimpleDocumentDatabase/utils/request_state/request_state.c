@@ -15,15 +15,10 @@ void free_http_response(sdb_http_response_t *http_response) {
 
 void free_stater(sdb_stater_t *stater) {
   if (stater != NULL) {
-    if (stater->success_body != NULL) {
-      free(stater->success_body);
-      stater->success_body = NULL;
-    }
-    if (stater->error_body != NULL) {
-      free(stater->error_body);
-      stater->error_body = NULL;
-    }
+    stater->success_body = NULL;
+    stater->error_body = NULL;
     stater->success_status = 0;
     stater->error_status = 0;
+    free(stater);
   }
 }

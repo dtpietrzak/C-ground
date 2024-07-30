@@ -5,7 +5,7 @@
 #include "./request_state/request_state.h"
 
 // fs
-// #include "./fs/access.h"
+#include "./fs/access.h"
 #include "./fs/dir_operations.h"
 #include "./fs/file_operations.h"
 // #include "./fs/save.h"
