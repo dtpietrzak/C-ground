@@ -1,9 +1,11 @@
 #include "delete.h"
 
-int handle_request_delete(HttpRequest* http_request,
-                          HttpResponse* http_response) {
-  char* requiredParams[] = {"id", "db"};
-  QueryParams queries = validate_queries(http_request, requiredParams, 2);
+int handle_request_delete(sdb_http_request_t* http_request,
+                          sdb_http_response_t* http_response) {
+  const char* params[] = {"id", "db"};
+
+  sdb_query_params_t queries =
+      validate_and_parse_queries(http_request, params, 2);
   if (queries.invalid != NULL) {
     http_response->status = 400;
     s_set(&http_response->body, queries.invalid);

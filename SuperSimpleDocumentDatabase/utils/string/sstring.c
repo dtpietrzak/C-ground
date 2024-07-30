@@ -11,10 +11,10 @@ void s_free(SString *sstring) {
   }
 }
 
-int s_init(SString *s_string, const char *value, uint16_t max_length) {
+bool s_init(SString *s_string, const char *value, uint16_t max_length) {
   // Check for NULL pointers
   if (s_string == NULL || value == NULL) {
-    return 1;
+    return false;
   }
 
   // Initialize SString fields to safe defaults
@@ -27,13 +27,13 @@ int s_init(SString *s_string, const char *value, uint16_t max_length) {
 
   // Check if value length exceeds max_length
   if (strlen(value) != s_string->length) {
-    return 1;
+    return false;
   }
 
   // Allocate memory for the string (plus one for null terminator)
   s_string->value = (char *)malloc(s_string->length + 1);
   if (s_string->value == NULL) {
-    return 1;  // Allocation failed
+    return false;  // Allocation failed
   }
   s_string->value[0] = '\0';
 
@@ -41,10 +41,10 @@ int s_init(SString *s_string, const char *value, uint16_t max_length) {
   strncpy(s_string->value, value, s_string->length);
   s_string->value[s_string->length] = '\0';
 
-  return 0;
+  return true;
 }
 
-int s_set(SString *s_string, const char *value) {
+bool s_set(SString *s_string, const char *value) {
   if (s_string->value != NULL) {
     free(s_string->value);
   }
@@ -54,13 +54,13 @@ int s_set(SString *s_string, const char *value) {
 
   // Check if value length exceeds max_length
   if (strlen(value) != s_string->length) {
-    return 1;
+    return false;
   }
 
   // Allocate memory for the string (plus one for null terminator)
   s_string->value = (char *)malloc(s_string->length + 1);
   if (s_string->value == NULL) {
-    return 1;  // Allocation failed
+    return false;  // Allocation failed
   }
   s_string->value[0] = '\0';
 
@@ -68,26 +68,26 @@ int s_set(SString *s_string, const char *value) {
   strncpy(s_string->value, value, s_string->length);
   s_string->value[s_string->length] = '\0';
 
-  return 0;
+  return true;
 }
 
-int s_append(SString *s_string, const char *append_value) {
+bool s_append(SString *s_string, const char *append_value) {
   // Ensure sstring and append_value are not NULL
   if (s_string == NULL) {
     printf("s_append error: s_string is NULL\n");
-    return 1;
+    return false;
   } else if (s_string->value == NULL) {
     printf("s_append error: s_string->value is NULL\n");
-    return 1;
+    return false;
   } else if (append_value == NULL) {
     printf("s_append error: append_value is NULL\n");
-    return 1;
+    return false;
   }
 
   // Ensure sstring is not corrupt
   if (strlen(s_string->value) != s_string->length) {
     printf("s_append error: s_string is corrupt, invalid ->length\n");
-    return 1;
+    return false;
   }
 
   // Calculate lengths
@@ -97,14 +97,14 @@ int s_append(SString *s_string, const char *append_value) {
   // Check if new length exceeds max_length
   if (new_length > s_string->max_length) {
     printf("s_append error: new_length exceeds max_length\n");
-    return 1;
+    return false;
   }
 
   // Malloc a new one
   char *new_value = (char *)malloc(new_length + 1);
   if (new_value == NULL) {
     printf("s_append error: malloc failed\n");
-    return 1;  // Allocation failed
+    return false;  // Allocation failed
   }
   new_value[0] = '\0';
 
@@ -119,18 +119,18 @@ int s_append(SString *s_string, const char *append_value) {
     free(s_string->value);
   }
   s_string->value = new_value;
-  return 0;
+  return true;
 }
 
-int s_prepend(SString *s_string, const char *prepend_value) {
+bool s_prepend(SString *s_string, const char *prepend_value) {
   // Ensure sstring and append_value are not NULL
   if (s_string == NULL || s_string->value == NULL || prepend_value == NULL) {
-    return 1;
+    return false;
   }
 
   // Ensure sstring is not corrupt
   if (strlen(s_string->value) != s_string->length) {
-    return 1;
+    return false;
   }
 
   // Calculate lengths
@@ -139,13 +139,13 @@ int s_prepend(SString *s_string, const char *prepend_value) {
 
   // Check if new length exceeds max_length
   if (new_length > s_string->max_length) {
-    return 1;
+    return false;
   }
 
   // Malloc a new one
   char *new_value = (char *)malloc(new_length + 1);
   if (new_value == NULL) {
-    return 1;  // Allocation failed
+    return false;  // Allocation failed
   }
   new_value[0] = '\0';
 
@@ -160,17 +160,17 @@ int s_prepend(SString *s_string, const char *prepend_value) {
     free(s_string->value);
   }
   s_string->value = new_value;
-  return 0;
+  return true;
 }
 
-int s_compile(SString *s_string, const char *format, ...) {
+bool s_compile(SString *s_string, const char *format, ...) {
   if (s_string->value != NULL) {
     free(s_string->value);
   }
   // Allocate a temporary buffer
   s_string->value = (char *)malloc(s_string->max_length + 1);
   if (s_string->value == NULL) {
-    return 1;  // Allocation failed
+    return false;  // Allocation failed
   }
   s_string->value[0] = '\0';
 
@@ -181,65 +181,65 @@ int s_compile(SString *s_string, const char *format, ...) {
   va_end(args);
   if (result == 0) {
     fprintf(stderr, "s_compile error: 0 result %d\n", result);
-    return 1;
+    return false;
   }
   if (result > s_string->max_length) {
     fprintf(stderr, "s_compile error: result too large: %d, %d\n",
             s_string->max_length, result);
-    return 1;
+    return false;
   }
   if (result < 0) {
     fprintf(stderr, "s_compile error: negative result%d\n", result);
-    return 1;
+    return false;
   }
 
   s_string->length = strlen(s_string->value);
-  return 0;
+  return true;
 }
 
-int s_contains_chars(const SString *s_string, const char *chars_to_check) {
+bool s_contains_chars(const SString *s_string, const char *chars_to_check) {
   for (const char *p = s_string->value; *p != '\0'; p++) {
     if (strchr(chars_to_check, *p) != NULL) {
-      return 0;
+      return true;
     }
   }
-  return 1;
+  return false;
 }
 
-int s_matches(const SString *s_string, const char *string_to_check) {
+bool s_matches(const SString *s_string, const char *string_to_check) {
   if (strlen(string_to_check) > s_string->max_length) {
-    return 1;
+    return false;
   }
   if (strncmp(s_string->value, string_to_check, s_string->max_length) == 0) {
-    return 0;
+    return true;
   } else {
-    return 1;
+    return false;
   }
 }
 
-int s_before_and_after(SString *s_string, const char *before,
-                       const char *after) {
+bool s_before_and_after(SString *s_string, const char *before,
+                        const char *after) {
   // Ensure sstring and before/after are not NULL
   if (s_string == NULL || s_string->value == NULL || before == NULL ||
       after == NULL) {
-    return 1;
+    return false;
   }
 
   // Ensure sstring is not corrupt
   if (strlen(s_string->value) != s_string->length) {
-    return 1;
+    return false;
   }
 
   // Calculate new length
   int new_length = strlen(before) + strlen(after) + s_string->length;
   if (new_length > s_string->max_length) {
-    return 1;
+    return false;
   }
 
   // Allocate memory for the string (plus one for null terminator)
   char *new_value = (char *)malloc(new_length + 1);
   if (new_value == NULL) {
-    return 1;
+    return false;
   }
   new_value[0] = '\0';
 
@@ -254,7 +254,7 @@ int s_before_and_after(SString *s_string, const char *before,
     free(s_string->value);
   }
   s_string->value = new_value;
-  return 0;
+  return true;
 }
 
 char *s_out(SString *s_string) {

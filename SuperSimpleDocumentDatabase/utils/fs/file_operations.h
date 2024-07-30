@@ -7,8 +7,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../global.c"
-#include "utils.h"
+#include "../../global.c"
+#include "../string/contains.h"
 
 #ifdef _WIN32
 #include <direct.h>  // For Windows mkdir

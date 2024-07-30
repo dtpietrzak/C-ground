@@ -3,15 +3,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sdb_utils.h>
 
-#include "../../utils/http.h"
-#include "../../utils/dir_operations.h"
-#include "../../utils/file_operations.h"
-#include "../../utils/parson.h"
-#include "../../utils/request_operations.h"
-#include "../../utils/utils.h"
 #include "utils/index_utils.h"
-#include "utils/meta_handlers.h"
+#include "utils/index_meta_handlers.h"
 
 #ifdef _WIN32
 #include <direct.h>  // For Windows mkdir
@@ -21,5 +16,5 @@
 #include <sys/stat.h>  // For mkdir
 #endif
 
-int handle_request_index_delete(HttpRequest* http_request,
-                                HttpResponse* http_response);
+int handle_request_index_delete(sdb_http_request_t* http_request,
+                                sdb_http_response_t* http_response);

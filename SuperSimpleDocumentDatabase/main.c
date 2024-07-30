@@ -4,10 +4,9 @@
 #include <uv.h>
 
 #include "global.c"
+#include "settings/settings.h"
 #include "server/_server_distributor/server_distributor.h"
-#include "utils/settings.h"
-#include "utils/sstring.h"
-#include "utils/utils.h"
+
 
 int main() {
   global_max_req_size = 65535;

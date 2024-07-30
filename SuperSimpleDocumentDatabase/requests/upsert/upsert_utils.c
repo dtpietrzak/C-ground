@@ -1,7 +1,7 @@
 #include "upsert_utils.h"
 
-char* get_schema_file_content(HttpResponse* http_response, char* schema_path,
-                              char* db_path, QueryParams queries) {
+char* get_schema_file_content(sdb_http_response_t* http_response, char* schema_path,
+                              char* db_path, sdb_query_params_t queries) {
   SString error_404;
   s_init(&error_404, "", 1024);
   s_compile(

@@ -2,8 +2,8 @@
 
 #define MAX_PATH_LENGTH 1024
 
-int handle_request_schema(HttpRequest* http_request,
-                          HttpResponse* http_response) {
+int handle_request_schema(sdb_http_request_t* http_request,
+                          sdb_http_response_t* http_response) {
   if (contains_invalid_chars(http_request->body.value,
                              INVALID_CHARS_REQUEST_BODY)) {
     http_response->status = 400;
@@ -11,8 +11,9 @@ int handle_request_schema(HttpRequest* http_request,
     return 1;
   }
 
-  char* requiredParams[] = {"db"};
-  QueryParams queries = validate_queries(http_request, requiredParams, 1);
+  const char* params[] = {"db"};
+  sdb_query_params_t queries =
+      validate_and_parse_queries(http_request, params, 1);
   if (queries.invalid != NULL) {
     http_response->status = 400;
     s_set(&http_response->body, queries.invalid);

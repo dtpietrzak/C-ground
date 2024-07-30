@@ -21,9 +21,9 @@
 // 0 = move on (thank you, next)
 // 1 = exit early
 int endpoint(const char* path, const char* method,
-             int (*handler)(HttpRequest*, HttpResponse*),
-             const char* error_prefix, HttpRequest* http_request,
-             HttpResponse* http_response) {
+             int (*handler)(sdb_http_request_t*, sdb_http_response_t*),
+             const char* error_prefix, sdb_http_request_t* http_request,
+             sdb_http_response_t* http_response) {
   if (strcmp(http_request->path, path) == 0) {
     if (strcmp(http_request->method, method) == 0) {
       if (handler(http_request, http_response) == 0) {
@@ -46,8 +46,8 @@ int endpoint(const char* path, const char* method,
   return 0;
 }
 
-void distribute_request(HttpRequest* http_request,
-                        HttpResponse* http_response) {
+void distribute_request(sdb_http_request_t* http_request,
+                        sdb_http_response_t* http_response) {
   if (endpoint("/query", "GET", handle_request_query,
                "Failed to query documents: ", http_request, http_response)) {
     return;
@@ -95,7 +95,7 @@ void distribute_request(HttpRequest* http_request,
 
 void handle_request(const char* request_str, SString* response_str) {
   // start response
-  HttpResponse http_response;
+  sdb_http_response_t http_response;
   s_init(&http_response.body, "", MAX_RES_SIZE);
 
   if (request_str == NULL) {
@@ -108,9 +108,9 @@ void handle_request(const char* request_str, SString* response_str) {
     validate_auth_header(request_str, &http_response);
     if (http_response.status != 401) {
       // start request
-      HttpRequest http_request;
+      sdb_http_request_t http_request;
       // Initialize request struct
-      memset(&http_request, 0, sizeof(HttpRequest));
+      memset(&http_request, 0, sizeof(sdb_http_request_t));
       s_init(&http_request.body, "", MAX_REQ_BODY_SIZE);
       // parse request string into request struct
       parse_http_request(request_str, &http_request);

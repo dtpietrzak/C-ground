@@ -1,14 +1,10 @@
-#ifndef HTTP_H
-#define HTTP_H
+#ifndef ERROR_H
+#define ERROR_H
 
-#include <ctype.h>
-#include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
+#include <uv.h>
 
-#include "../global.c"
-#include "sstring.h"
-#include "utils.h"
+#include "../string/sstring.h"
 
 #define MAX_REQ_METHOD_SIZE 8
 #define MAX_REQ_PATH_SIZE 1024
@@ -31,19 +27,34 @@ typedef struct {
   char headers[MAX_REQ_HEADERS][MAX_REQ_HEADER_SIZE];
   int num_headers;
   SString body;
-} HttpRequest;
+} sdb_http_request_t;
 
 typedef struct {
   uint16_t status;
   SString body;
-} HttpResponse;
+} sdb_http_response_t;
 
-void validate_auth_header(const char *request_str, HttpResponse *http_response);
-void parse_http_request(const char *request_str, HttpRequest *request);
-void compile_http_response(HttpResponse *http_response, SString *response_str);
-void free_http_request(HttpRequest *request);
-void free_http_response(HttpResponse *http_response);
-char *url_encode(const char *str);
-char *url_decode(const char *str);
+typedef struct {
+  char* success_body;
+  int success_status;
+  char* error_body;
+  int error_status;
+} sdb_stater_t;
 
-#endif  // HTTP_H
+typedef struct {
+  char* invalid;
+  char* id;
+  char* key;
+  char* value;
+  char* query;
+  char* db;
+  char* limit;
+  char* offset;
+  char* sort;
+} sdb_query_params_t;
+
+void free_http_request(sdb_http_request_t* http_request);
+void free_http_response(sdb_http_response_t* http_response);
+void free_stater(sdb_stater_t* stater);
+
+#endif  // ERROR_H

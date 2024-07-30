@@ -14,7 +14,7 @@ volatile sig_atomic_t stop_server = 0;
 
 void process_request(const char *request_str, SString *response_str) {
   // start response
-  HttpResponse http_response;
+  sdb_http_response_t http_response;
   s_init(&http_response.body, "", MAX_RES_SIZE);
 
   if (request_str == NULL) {
@@ -27,9 +27,9 @@ void process_request(const char *request_str, SString *response_str) {
     validate_auth_header(request_str, &http_response);
     if (http_response.status != 401) {
       // start request
-      HttpRequest http_request;
+      sdb_http_request_t http_request;
       // Initialize request struct
-      memset(&http_request, 0, sizeof(HttpRequest));
+      memset(&http_request, 0, sizeof(sdb_http_request_t));
       s_init(&http_request.body, "", MAX_REQ_BODY_SIZE);
       // parse request string into request struct
       parse_http_request(request_str, &http_request);

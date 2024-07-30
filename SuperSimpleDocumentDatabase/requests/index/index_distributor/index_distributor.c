@@ -1,6 +1,6 @@
 #include "index_distributor.h"
 
-const char* index_distributor(HttpResponse* http_response,
+const char* index_distributor(sdb_http_response_t* http_response,
                               JSON_Value_Type json_value_type,
                               const JSON_Object* json_object, const char* key) {
   switch (json_value_type) {

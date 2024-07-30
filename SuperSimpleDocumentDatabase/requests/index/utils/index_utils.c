@@ -1,6 +1,6 @@
 #include "index_utils.h"
 
-int get_json_array_with_count(HttpResponse* http_response,
+int get_json_array_with_count(sdb_http_response_t* http_response,
                               char* string_to_parse,
                               JSON_Array_With_Count* json_array_with_count,
                               char* error_identity) {
@@ -26,7 +26,7 @@ int get_json_array_with_count(HttpResponse* http_response,
   return 0;
 }
 
-int insert_new_meta(HttpResponse* http_response,
+int insert_new_meta(sdb_http_response_t* http_response,
                     JSON_Array_With_Count request_array_with_count,
                     JSON_Array_With_Count existing_meta_array_with_count) {
   // add requested index items to the existing index meta data

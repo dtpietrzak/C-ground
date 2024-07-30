@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-
-#include "../../utils/http.h"
+#include <sdb_utils.h>
 
 // http_server.h / https_server.h handle the server logic HTTP / HTTPS
 // request_distributor.h handles the request logic

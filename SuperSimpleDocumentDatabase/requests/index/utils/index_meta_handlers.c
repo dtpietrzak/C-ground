@@ -1,8 +1,8 @@
-#include "meta_handlers.h"
+#include "index_meta_handlers.h"
 
 // upsert the requested index meta items to the existing index meta data
 
-const JSON_Value* upserted_meta(HttpResponse* http_response,
+const JSON_Value* upserted_meta(sdb_http_response_t* http_response,
                                 JSON_Array_With_Count request_array_with_count,
                                 char* existing_meta) {
   const JSON_Value* updated_json_value = json_value_init_array();
@@ -61,7 +61,7 @@ void free_removed_items(char** removed_items, int count) {
 //  remove the requested index meta items from the existing index meta data
 
 const JSON_Value_With_Removed_Items* removed_meta(
-    HttpResponse* http_response, JSON_Array_With_Count request_array_with_count,
+    sdb_http_response_t* http_response, JSON_Array_With_Count request_array_with_count,
     char* existing_meta) {
   // argument guards start
   if (existing_meta == NULL) return NULL;

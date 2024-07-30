@@ -1,6 +1,6 @@
 #include "index_a_doc.h"
 
-const char* get_document_dot_value_as_string(HttpResponse* http_response,
+const char* get_document_dot_value_as_string(sdb_http_response_t* http_response,
                                              const char* file_path,
                                              const char* key) {
   char* file_content =
@@ -50,7 +50,7 @@ const char* get_document_dot_value_as_string(HttpResponse* http_response,
   return document_dot_value;
 }
 
-int index_a_doc(HttpResponse* http_response, const char* db_name,
+int index_a_doc(sdb_http_response_t* http_response, const char* db_name,
                 const char* filename, const char* request_meta_string) {
   const char* file_path = derive_path(3, "db", db_name, filename);
   if (file_path == NULL) {

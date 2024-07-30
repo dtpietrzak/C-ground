@@ -1,9 +1,7 @@
-#include "../../../utils/parson.h"
-#include "../../../utils/request_operations.h"
+#include <sdb_utils.h>
 #include "../utils/index_utils.h"
-#include "../../../utils/http.h"
 
-const char* index_distributor(HttpResponse* http_response,
+const char* index_distributor(sdb_http_response_t* http_response,
                               JSON_Value_Type json_value_type,
                               const JSON_Object* json_object, const char* key);
 
