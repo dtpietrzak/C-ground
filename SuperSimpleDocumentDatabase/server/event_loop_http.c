@@ -13,6 +13,9 @@ void on_alloc_buffer(uv_handle_t *handle, size_t suggested_size,
 
 void on_read(uv_stream_t *client_stream, ssize_t nread, const uv_buf_t *buf) {
   if (nread > 0) {
+    // looks like I need a new allocation here to handle multiple chunks
+    // seems weird, why wouldnt libuv handle this? shrug. more research needed
+
     debug_request_string(buf->base);
 
     // start response_body
@@ -36,6 +39,9 @@ void on_read(uv_stream_t *client_stream, ssize_t nread, const uv_buf_t *buf) {
     } else {
       printf("Failed to process request.\n");
     }
+  } else if (nread == UV_EOF) {
+    uv_close((uv_handle_t *)client_stream, NULL);
+    mem_free(client_stream, "client_tcp_buffer", 2);
   } else if (nread < 0) {  // error case
     if (nread != UV_EOF) {
       fprintf(stderr, "Read error: %s\n", uv_strerror(nread));
@@ -45,7 +51,6 @@ void on_read(uv_stream_t *client_stream, ssize_t nread, const uv_buf_t *buf) {
   if (buf->base) {
     mem_free(buf->base, "on_alloc_buffer", 2);
   }
-  uv_close((uv_handle_t *)client_stream, NULL);
 }
 
 int validate_tcp_ip(const uv_tcp_t *client) {
@@ -72,25 +77,27 @@ int validate_tcp_ip(const uv_tcp_t *client) {
   }
 }
 
-void on_connection(uv_stream_t *server, int status) {
+void on_connection(uv_stream_t *server_stream, int status) {
   if (status < 0) {
     fprintf(stderr, "New connection error %s\n", uv_strerror(status));
     return;
   }
 
-  uv_tcp_t *client = (uv_tcp_t *)malloc(sizeof(uv_tcp_t));
-  if (!client) {
+  uv_tcp_t *client_stream =
+      (uv_tcp_t *)mem_malloc(sizeof(uv_tcp_t), "client_tcp_buffer", 2);
+  if (!client_stream) {
     fprintf(stderr, "Memory allocation error\n");
     return;
   }
 
-  uv_tcp_init(uv_default_loop(), client);
+  uv_tcp_init(uv_default_loop(), client_stream);
 
-  if (uv_accept(server, (uv_stream_t *)client) == 0 &&
-      validate_tcp_ip(client) == 0) {
-    uv_read_start((uv_stream_t *)client, on_alloc_buffer, on_read);
+  if (uv_accept(server_stream, (uv_stream_t *)client_stream) == 0 &&
+      validate_tcp_ip(client_stream) == 0) {
+    uv_read_start((uv_stream_t *)client_stream, on_alloc_buffer, on_read);
   } else {
-    uv_close((uv_handle_t *)client, NULL);
+    uv_close((uv_handle_t *)client_stream, NULL);
+    mem_free(client_stream, "client_tcp_buffer", 2);
   }
 }
 
