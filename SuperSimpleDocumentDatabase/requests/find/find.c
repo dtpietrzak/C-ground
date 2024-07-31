@@ -26,7 +26,7 @@ int handle_request_find(sdb_http_request_t* http_request,
 
   // Check if the file exists
   sdb_stater_t* stater_doc_exists = calloc(1, sizeof(sdb_stater_t));
-  stater_doc_exists->error_body = "Requested document does not exist";
+  stater_doc_exists->error_body = "Requested index document does not exist";
   stater_doc_exists->error_status = 404;
   if (!fs_file_access_sync(http_response, index_path, stater_doc_exists,
                            F_OK)) {
@@ -36,7 +36,7 @@ int handle_request_find(sdb_http_request_t* http_request,
   // Check if the file is readable
   sdb_stater_t* stater_read_access = calloc(1, sizeof(sdb_stater_t));
   stater_read_access->error_body =
-      "Requested document does not have read permissions";
+      "Requested index document does not have read permissions";
   stater_read_access->error_status = 500;
   if (!fs_file_access_sync(http_response, index_path, stater_read_access,
                            R_OK)) {
@@ -44,14 +44,12 @@ int handle_request_find(sdb_http_request_t* http_request,
   }
 
   // Read file content into string
-  const char* file_content = read_file_to_string(index_path);
-  if (file_content == NULL) {
-    // 500 here even in the case of the file not existing
-    // because we're checking that above
-    http_response->status = 500;
-    s_compile(&http_response->body,
-              "Failed to read data from the requested document: %s",
-              index_path);
+  char* file_content = NULL;
+  sdb_stater_t* stater_load = calloc(1, sizeof(sdb_stater_t));
+  stater_load->error_body = "Failed to load index document";
+  stater_load->error_status = 500;
+  if (!fs_file_load_sync(http_response, &file_content, index_path, stater_load,
+                         O_RDONLY)) {
     return 1;
   }
 

@@ -84,6 +84,7 @@ sdb_query_params_t validate_and_parse_queries(sdb_http_request_t *http_request,
 
   if (http_request->num_queries > num_of_params) {
     sdb_query_params_t.invalid = "Invalid number of queries - too many";
+    fprintf(stderr, "%s", sdb_query_params_t.invalid);
     return sdb_query_params_t;
   }
 
@@ -139,10 +140,12 @@ sdb_query_params_t validate_and_parse_queries(sdb_http_request_t *http_request,
   if (id_is_required) {
     if (sdb_query_params_t.id == NULL) {
       sdb_query_params_t.invalid = "Id is missing";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     } else if (contains_invalid_chars(sdb_query_params_t.id,
                                       INVALID_CHARS_DIRS_AND_FILES)) {
       sdb_query_params_t.invalid = "Id contains invalid characters";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     }
   }
@@ -150,10 +153,12 @@ sdb_query_params_t validate_and_parse_queries(sdb_http_request_t *http_request,
   if (key_is_required) {
     if (sdb_query_params_t.key == NULL) {
       sdb_query_params_t.invalid = "Key is missing";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     } else if (contains_invalid_chars(sdb_query_params_t.key,
                                       INVALID_CHARS_DIRS_AND_FILES)) {
       sdb_query_params_t.invalid = "Key contains invalid characters";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     }
   }
@@ -161,10 +166,12 @@ sdb_query_params_t validate_and_parse_queries(sdb_http_request_t *http_request,
   if (value_is_required) {
     if (sdb_query_params_t.value == NULL) {
       sdb_query_params_t.invalid = "Value is missing";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     } else if (contains_invalid_chars(sdb_query_params_t.value,
                                       INVALID_CHARS_DIRS_AND_FILES)) {
       sdb_query_params_t.invalid = "Value contains invalid characters";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     }
   }
@@ -172,10 +179,12 @@ sdb_query_params_t validate_and_parse_queries(sdb_http_request_t *http_request,
   if (query_is_required) {
     if (sdb_query_params_t.query == NULL) {
       sdb_query_params_t.invalid = "Query is missing";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     } else if (contains_invalid_chars(sdb_query_params_t.query,
                                       INVALID_CHARS_DIRS_AND_FILES)) {
       sdb_query_params_t.invalid = "Query contains invalid characters";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     } else if (strcmp(sdb_query_params_t.query, "all") != 0 &&
                strcmp(sdb_query_params_t.query, "gtr") != 0 &&
@@ -183,6 +192,7 @@ sdb_query_params_t validate_and_parse_queries(sdb_http_request_t *http_request,
                strcmp(sdb_query_params_t.query, "gte") != 0 &&
                strcmp(sdb_query_params_t.query, "lte") != 0) {
       sdb_query_params_t.invalid = "Query is invalid";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     }
   }
@@ -190,33 +200,40 @@ sdb_query_params_t validate_and_parse_queries(sdb_http_request_t *http_request,
   if (db_is_required) {
     if (sdb_query_params_t.db == NULL) {
       sdb_query_params_t.invalid = "Db name is missing";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     } else if (contains_invalid_chars(sdb_query_params_t.db,
                                       INVALID_CHARS_DIRS_AND_FILES)) {
       sdb_query_params_t.invalid =
           "Db name contains invalid characters (cannot contain: "
           "\\/:*?\"<>|)";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     }
     if (contains_periods(sdb_query_params_t.db)) {
       sdb_query_params_t.invalid =
           "Db name contains invalid characters (cannot contain a period)";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     }
   }
 
   if (sdb_query_params_t.limit != NULL) {
-    if (!contains_only_valid_chars(sdb_query_params_t.limit, VALID_CHARS_NUMBERS)) {
+    if (!contains_only_valid_chars(sdb_query_params_t.limit,
+                                   VALID_CHARS_NUMBERS)) {
       sdb_query_params_t.invalid =
           "Limit contains invalid characters - must be a positive integer";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     }
   }
 
   if (sdb_query_params_t.offset != NULL) {
-    if (!contains_only_valid_chars(sdb_query_params_t.offset, VALID_CHARS_NUMBERS)) {
+    if (!contains_only_valid_chars(sdb_query_params_t.offset,
+                                   VALID_CHARS_NUMBERS)) {
       sdb_query_params_t.invalid =
           "Offset contains invalid characters - must be a positive integer";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     }
   }
@@ -227,8 +244,13 @@ sdb_query_params_t validate_and_parse_queries(sdb_http_request_t *http_request,
       sdb_query_params_t.invalid =
           "Sort contains invalid characters - must be 'asc' "
           "or 'desc'";
+      fprintf(stderr, "%s", sdb_query_params_t.invalid);
       return sdb_query_params_t;
     }
+  }
+
+  if (sdb_query_params_t.invalid) {
+    printf("Unexpected query invalid error: %s\n", sdb_query_params_t.invalid);
   }
 
   return sdb_query_params_t;

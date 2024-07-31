@@ -8,6 +8,7 @@
 #include "./fs/access.h"
 #include "./fs/dir_operations.h"
 #include "./fs/file_operations.h"
+#include "./fs/load.h"
 // #include "./fs/save.h"
 
 // http

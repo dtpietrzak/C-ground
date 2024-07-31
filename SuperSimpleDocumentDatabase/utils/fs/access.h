@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <uv.h>
 
-#include "../http/http.h"
 #include "../request_state/request_state.h"
 
 bool fs_file_access_sync(sdb_http_response_t* http_response,

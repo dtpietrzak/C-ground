@@ -4,7 +4,8 @@
 
 void on_alloc_buffer(uv_handle_t *handle, size_t suggested_size,
                      uv_buf_t *buf) {
-  printf("Allocating buffer of size %zu\n", suggested_size);
+  mem_init("on_alloc_buffer", 2);
+
   buf->base = (char *)malloc(suggested_size);
   buf->len = suggested_size;
   if (buf->base) {
@@ -14,7 +15,7 @@ void on_alloc_buffer(uv_handle_t *handle, size_t suggested_size,
 
 void on_read(uv_stream_t *client_stream, ssize_t nread, const uv_buf_t *buf) {
   if (nread > 0) {
-    printf("Request:\n%s\n\n", buf->base);
+    debug_request_string(buf->base);
 
     // start response_body
     SString response_str;
@@ -26,10 +27,11 @@ void on_read(uv_stream_t *client_stream, ssize_t nread, const uv_buf_t *buf) {
     // Free buffer allocated by on_alloc_buffer
     if (buf->base) {
       free(buf->base);
+      mem_free("on_alloc_buffer", 2);
     }
 
     if (response_str.value != NULL) {
-      printf("Response:\n%s\n\n\n", response_str.value);
+      debug_response_string(response_str.value);
 
       uv_write_t write_req;
       uv_buf_t write_buf = uv_buf_init(response_str.value, response_str.length);
@@ -88,7 +90,6 @@ void on_connection(uv_stream_t *server, int status) {
 
   if (uv_accept(server, (uv_stream_t *)client) == 0 &&
       validate_tcp_ip(client) == 0) {
-    printf("\n\nAccepted connection!\n");
     uv_read_start((uv_stream_t *)client, on_alloc_buffer, on_read);
   } else {
     uv_close((uv_handle_t *)client, NULL);

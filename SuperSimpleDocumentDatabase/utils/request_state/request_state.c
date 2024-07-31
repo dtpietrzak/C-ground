@@ -22,3 +22,15 @@ void free_stater(sdb_stater_t *stater) {
     free(stater);
   }
 }
+
+void debug_request_string(const char *request_str) {
+  if (DEBUG_REQUEST_STRING) {
+    printf("Request String: %s\n", request_str);
+  }
+}
+
+void debug_response_string(const char *response_str) {
+  if (DEBUG_RESPONSE_STRING) {
+    printf("Response String:\n%s\n\n\n", response_str);
+  }
+}

@@ -14,7 +14,7 @@ int handle_request_doc(sdb_http_request_t* http_request,
     return 1;
   }
 
-  char* db_path = derive_path(3, "db", queries.db, queries.id);
+  const char* db_path = derive_path(3, "db", queries.db, queries.id);
 
   // if db_path is an error message
   if (db_path == NULL) {
@@ -40,46 +40,51 @@ int handle_request_doc(sdb_http_request_t* http_request,
     return 1;
   }
 
-  // Read file content into string
-  char* file_content = read_file_to_string(db_path);
-  if (file_content == NULL) {
-    // 500 here even in the case of the file not existing
-    // because we're checking that above
-    http_response->status = 500;
-    s_compile(&http_response->body,
-              "Failed to read data from the requested document: %s", db_path);
+  char* file_content = NULL;
+  sdb_stater_t* stater_load = calloc(1, sizeof(sdb_stater_t));
+  stater_load->error_body = "Failed to load document";
+  stater_load->error_status = 500;
+  if (!fs_file_load_sync(http_response, &file_content, db_path, stater_load,
+                         O_RDONLY)) {
     return 1;
   }
 
   if (contains_periods(queries.id)) {
-    // remove the before the first dot and the first dot itself
-    char* json_id = strchr(queries.id, '.') + 1;
+    // remove the part before the first dot and the first dot itself
+    const char* json_id = strchr(queries.id, '.') + 1;
+    char* json_id_decoded = url_decode(json_id);
 
     // parse the json to get its value
-    JSON_Value* json = json_parse_string_with_comments(file_content);
-    JSON_Object* json_object = json_value_get_object(json);
-    JSON_Value* value = json_object_dotget_value(json_object, json_id);
+    const JSON_Value* json = json_parse_string_with_comments(file_content);
+    const JSON_Object* json_obj = json_value_get_object(json);
+    const JSON_Value* value =
+        json_object_dotget_value(json_obj, json_id_decoded);
+    free(json_id_decoded);
     if (value == NULL) {
       http_response->status = 404;
       s_compile(&http_response->body, "id not found in document: %s",
                 queries.id);
+      free(file_content);
       return 1;
     } else {
       http_response->status = 200;
       s_set(&http_response->body, json_serialize_to_string(value));
+      free(file_content);
       return 0;
     }
   } else {
     // get the whole object, but filter out any comments
     // from the JSON and minify it (done via parson)
-    JSON_Value* json = json_parse_string_with_comments(file_content);
+    const JSON_Value* json = json_parse_string_with_comments(file_content);
     if (json == NULL) {
       http_response->status = 500;
       s_compile(&http_response->body, "Failed to parse JSON");
+      free(file_content);
       return 1;
     } else {
       http_response->status = 200;
       s_set(&http_response->body, json_serialize_to_string(json));
+      free(file_content);
       return 0;
     }
   }

@@ -62,7 +62,7 @@ int start_server_blocking_http(int port) {
 
     buffer[len] = '\0';
 
-    printf("Request: %s\n", buffer);
+    debug_request_string(buffer);
 
     // start response_body
     SString response_str;
@@ -72,7 +72,7 @@ int start_server_blocking_http(int port) {
     handle_request(buffer, &response_str);
 
     if (response_str.value != NULL) {
-      printf("Response:\n%s\n\n\n", response_str.value);
+      debug_response_string(response_str.value);
       write(client_fd, response_str.value, response_str.length);
     } else {
       printf("Failed to process request.\n");

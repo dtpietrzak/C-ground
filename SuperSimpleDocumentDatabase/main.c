@@ -1,14 +1,15 @@
+#include <sdb_utils.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <uv.h>
 
 #include "global.c"
-#include "settings/settings.h"
 #include "server/_server_distributor/server_distributor.h"
-
+#include "settings/settings.h"
 
 int main() {
+  mem_check_init();
   global_max_req_size = 65535;
   global_max_res_size = 65535;
 

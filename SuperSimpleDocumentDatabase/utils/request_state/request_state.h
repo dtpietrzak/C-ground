@@ -1,10 +1,14 @@
 #ifndef ERROR_H
 #define ERROR_H
 
+#include <stdbool.h>
 #include <string.h>
 #include <uv.h>
 
 #include "../string/sstring.h"
+
+#define DEBUG_REQUEST_STRING false
+#define DEBUG_RESPONSE_STRING false
 
 #define MAX_REQ_METHOD_SIZE 8
 #define MAX_REQ_PATH_SIZE 1024
@@ -56,5 +60,8 @@ typedef struct {
 void free_http_request(sdb_http_request_t* http_request);
 void free_http_response(sdb_http_response_t* http_response);
 void free_stater(sdb_stater_t* stater);
+
+void debug_request_string(const char* request_str);
+void debug_response_string(const char* respoonse_str);
 
 #endif  // ERROR_H
