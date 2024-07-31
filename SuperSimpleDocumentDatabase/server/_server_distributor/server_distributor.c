@@ -21,20 +21,16 @@ int run_server(void) {
 
   switch (server_type) {
     case 11:
-      printf("Server type: %d (blocking, http)\n", server_type);
       return start_server_blocking_http(global_setting_port);
     case 12:
-      printf("Server type: %d (blocking, https)\n", server_type);
       return start_server_blocking_https(global_setting_port);
     case 21:
-      printf("Server type: %d (event loop, http)\n", server_type);
       return start_server_event_loop_http(global_setting_port);
     case 22:
-      printf("Server type: %d (event loop, https)\n", server_type);
       printf("Sorry, this setup has not been implemented yet.\n");
       return 1;
     default:
-      printf("Server type: %d (unknown)\n", server_type);
+      fprintf(stderr, "Server type: %d (unknown)\n", server_type);
       return 1;
   }
 }

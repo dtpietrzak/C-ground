@@ -68,8 +68,6 @@ int start_server_blocking_https(int port) {
 
   listen(server_fd, 10);
 
-  printf("Listening on port %d\n", port);
-
   while (1) {
     int client_fd =
         accept(server_fd, (struct sockaddr *)&client_addr, &addr_len);

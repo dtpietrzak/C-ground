@@ -38,9 +38,7 @@ int start_server_blocking_http(int port) {
     close(server_fd);
     return 1;
   }
-
-  printf("Listening on port %d\n", port);
-
+  
   // Register signal handler for graceful shutdown
   signal(SIGINT, handle_signal);
 

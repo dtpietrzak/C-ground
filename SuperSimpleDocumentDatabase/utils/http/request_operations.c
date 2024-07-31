@@ -14,7 +14,7 @@ char* get_file_content(sdb_http_response_t* http_response,
   sdb_stater_t* stater_doc_exists = calloc(1, sizeof(sdb_stater_t));
   stater_doc_exists->error_body = "Requested document does not exist";
   stater_doc_exists->error_status = 404;
-  if (!fs_file_access_sync(http_response, relative_path, stater_doc_exists,
+  if (!fs_file_access(http_response, relative_path, stater_doc_exists,
                            F_OK)) {
     return NULL;
   }
@@ -24,7 +24,7 @@ char* get_file_content(sdb_http_response_t* http_response,
   stater_read_access->error_body =
       "Requested document does not have read permissions";
   stater_read_access->error_status = 500;
-  if (!fs_file_access_sync(http_response, relative_path, stater_read_access,
+  if (!fs_file_access(http_response, relative_path, stater_read_access,
                            R_OK)) {
     return NULL;
   }
@@ -78,7 +78,7 @@ int save_string(sdb_http_response_t* http_response, const char* string_to_save,
       strcat(error_message_500, " - Document does not have write permissions");
       stater_write_access->error_body = error_message_500;
       stater_write_access->error_status = 500;
-      if (!fs_file_access_sync(http_response, relative_path,
+      if (!fs_file_access(http_response, relative_path,
                                stater_write_access, W_OK)) {
         return 1;
       }
@@ -100,7 +100,7 @@ int save_string(sdb_http_response_t* http_response, const char* string_to_save,
       strcat(error_message_500, " - Document does not have write permissions");
       stater_write_access->error_body = error_message_500;
       stater_write_access->error_status = 500;
-      if (!fs_file_access_sync(http_response, relative_path,
+      if (!fs_file_access(http_response, relative_path,
                                stater_write_access, W_OK)) {
         return 1;
       }

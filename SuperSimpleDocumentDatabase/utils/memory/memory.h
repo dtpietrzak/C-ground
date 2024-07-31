@@ -19,9 +19,17 @@
 
 #define MEM_CHECK_SIZE 4096
 
-void mem_check_init(void);
-void mem_init(const char* id, int debug_layer);
-void mem_free(const char* id, int debug_layer);
-void mem_check(int debug_layer);
+void mem_checker_init(void);
+void mem_checker_alloc(const char* id, int debug_layer);
+void mem_checker_free(const char* id, int debug_layer);
+
+void mem_checker_check(int debug_layer);
+
+void* mem_malloc(size_t __size, const char* id, int debug_layer);
+void* mem_calloc(size_t __count, size_t __size, const char* id,
+                 int debug_layer);
+void* mem_realloc(void* __ptr, size_t __size, const char* id, int debug_layer);
+
+void mem_free(void* __ptr, const char* id, int debug_layer);
 
 #endif  // MEMORY_MEMORY_H

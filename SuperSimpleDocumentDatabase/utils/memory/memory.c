@@ -2,7 +2,7 @@
 
 char* mem_check_string;
 
-void mem_check_init(void) {
+void mem_checker_init(void) {
   if (DEBUG) {
     mem_check_string = calloc(1, sizeof(char) * MEM_CHECK_SIZE);
   }
@@ -18,7 +18,7 @@ void ensure_mem_check_string_size(const char* id) {
   }
 }
 
-void mem_init(const char* id, int debug_layer) {
+void mem_checker_alloc(const char* id, int debug_layer) {
   if (DEBUG && debug_layer >= DEBUG_LAYER) {
     ensure_mem_check_string_size(id);
 
@@ -40,7 +40,7 @@ void mem_init(const char* id, int debug_layer) {
   }
 }
 
-void mem_free(const char* id, int debug_layer) {
+void mem_checker_free(const char* id, int debug_layer) {
   if (DEBUG && debug_layer >= DEBUG_LAYER) {
     ensure_mem_check_string_size(id);
     printf("(%d) MEM - FREE: %s\n", debug_layer, id);
@@ -68,7 +68,7 @@ void mem_free(const char* id, int debug_layer) {
   }
 }
 
-void mem_check(int debug_layer) {
+void mem_checker_check(int debug_layer) {
   if (DEBUG && debug_layer >= DEBUG_LAYER) {
     if (strlen(mem_check_string) > 0) {
       printf("(%d) MEM - CHECK: %s\n", debug_layer, mem_check_string);
@@ -77,4 +77,25 @@ void mem_check(int debug_layer) {
              debug_layer);
     }
   }
+}
+
+void* mem_malloc(size_t __size, const char* id, int debug_layer) {
+  mem_checker_alloc(id, debug_layer);
+  return malloc(__size);
+}
+
+void* mem_calloc(size_t __count, size_t __size, const char* id,
+                 int debug_layer) {
+  mem_checker_alloc(id, debug_layer);
+  return calloc(__count, __size);
+}
+
+void* mem_realloc(void* __ptr, size_t __size, const char* id, int debug_layer) {
+  mem_checker_alloc(id, debug_layer);
+  return realloc(__ptr, __size);
+}
+
+void mem_free(void* __ptr, const char* id, int debug_layer) {
+  mem_checker_free(id, debug_layer);
+  free(__ptr);
 }

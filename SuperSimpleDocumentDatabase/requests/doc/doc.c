@@ -27,7 +27,7 @@ int handle_request_doc(sdb_http_request_t* http_request,
   sdb_stater_t* stater_doc_exists = calloc(1, sizeof(sdb_stater_t));
   stater_doc_exists->error_body = "Requested document does not exist";
   stater_doc_exists->error_status = 404;
-  if (!fs_file_access_sync(http_response, db_path, stater_doc_exists, F_OK)) {
+  if (!fs_file_access(http_response, db_path, stater_doc_exists, F_OK)) {
     return 1;
   }
 
@@ -36,7 +36,7 @@ int handle_request_doc(sdb_http_request_t* http_request,
   stater_read_access->error_body =
       "Requested document does not have read permissions";
   stater_read_access->error_status = 500;
-  if (!fs_file_access_sync(http_response, db_path, stater_read_access, R_OK)) {
+  if (!fs_file_access(http_response, db_path, stater_read_access, R_OK)) {
     return 1;
   }
 
@@ -44,8 +44,7 @@ int handle_request_doc(sdb_http_request_t* http_request,
   sdb_stater_t* stater_load = calloc(1, sizeof(sdb_stater_t));
   stater_load->error_body = "Failed to load document";
   stater_load->error_status = 500;
-  if (!fs_file_load_sync(http_response, &file_content, db_path, stater_load,
-                         O_RDONLY)) {
+  if (!fs_file_load(http_response, &file_content, db_path, stater_load)) {
     return 1;
   }
 

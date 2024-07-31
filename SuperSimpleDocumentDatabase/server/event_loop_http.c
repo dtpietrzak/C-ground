@@ -4,9 +4,7 @@
 
 void on_alloc_buffer(uv_handle_t *handle, size_t suggested_size,
                      uv_buf_t *buf) {
-  mem_init("on_alloc_buffer", 2);
-
-  buf->base = (char *)malloc(suggested_size);
+  buf->base = (char *)mem_malloc(suggested_size, "on_alloc_buffer", 2);
   buf->len = suggested_size;
   if (buf->base) {
     memset(buf->base, 0, suggested_size);  // Zero out the buffer
@@ -24,30 +22,30 @@ void on_read(uv_stream_t *client_stream, ssize_t nread, const uv_buf_t *buf) {
     // Process the received data
     handle_request(buf->base, &response_str);
 
-    // Free buffer allocated by on_alloc_buffer
-    if (buf->base) {
-      free(buf->base);
-      mem_free("on_alloc_buffer", 2);
-    }
-
     if (response_str.value != NULL) {
       debug_response_string(response_str.value);
 
       uv_write_t write_req;
       uv_buf_t write_buf = uv_buf_init(response_str.value, response_str.length);
-      uv_write(&write_req, client_stream, &write_buf, 1, NULL);
-
+      int write_status =
+          uv_write(&write_req, client_stream, &write_buf, 1, NULL);
+      if (write_status != 0) {
+        fprintf(stderr, "Write error: %s\n", uv_strerror(write_status));
+      }
       s_free(&response_str);
     } else {
       printf("Failed to process request.\n");
-      uv_close((uv_handle_t *)client_stream, NULL);
     }
-  } else if (nread < 0) {
+  } else if (nread < 0) {  // error case
     if (nread != UV_EOF) {
       fprintf(stderr, "Read error: %s\n", uv_strerror(nread));
     }
-    uv_close((uv_handle_t *)client_stream, NULL);
   }
+
+  if (buf->base) {
+    mem_free(buf->base, "on_alloc_buffer", 2);
+  }
+  uv_close((uv_handle_t *)client_stream, NULL);
 }
 
 int validate_tcp_ip(const uv_tcp_t *client) {
@@ -97,13 +95,13 @@ void on_connection(uv_stream_t *server, int status) {
 }
 
 uv_tcp_t server;
-uv_loop_t *loop;
 uv_signal_t sigint;
 
 volatile sig_atomic_t stop_server = 0;
 
 // Signal handler function
 void handle_sigint(uv_signal_t *handle, int signum) {
+  uv_loop_t *loop = uv_default_loop();
   stop_server = 1;
   if (signum == SIGINT) {
     printf("\nClosing the server...\n");
@@ -116,7 +114,7 @@ void handle_sigint(uv_signal_t *handle, int signum) {
 }
 
 int start_server_event_loop_http(int port) {
-  loop = uv_default_loop();
+  uv_loop_t *loop = uv_default_loop();
   uv_tcp_init(loop, &server);
 
   struct sockaddr_in bind_addr;
@@ -128,8 +126,6 @@ int start_server_event_loop_http(int port) {
     fprintf(stderr, "\nListen error %s\n", uv_strerror(r));
     return 1;
   }
-
-  printf("\nListening on port %d\n", global_setting_port);
 
   uv_signal_init(loop, &sigint);
   uv_signal_start(&sigint, handle_sigint, SIGINT);

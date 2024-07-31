@@ -47,7 +47,7 @@ int handle_request_schema(sdb_http_request_t* http_request,
       stater_write_access->error_body =
           "Schema document does not have write permissions";
       stater_write_access->error_status = 500;
-      if (!fs_file_access_sync(http_response, schema_path, stater_write_access,
+      if (!fs_file_access(http_response, schema_path, stater_write_access,
                                W_OK)) {
         return 1;
       }
@@ -73,7 +73,7 @@ int handle_request_schema(sdb_http_request_t* http_request,
       stater_write_access->error_body =
           "Schema document does not have write permissions";
       stater_write_access->error_status = 500;
-      if (!fs_file_access_sync(http_response, schema_path, stater_write_access,
+      if (!fs_file_access(http_response, schema_path, stater_write_access,
                                W_OK)) {
         return 1;
       }

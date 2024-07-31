@@ -9,11 +9,11 @@
 #include "settings/settings.h"
 
 int main() {
-  mem_check_init();
+  mem_checker_init();
   global_max_req_size = 65535;
   global_max_res_size = 65535;
 
-  printf("Starting server...\n");
+  uv_loop_t *loop = uv_default_loop();
 
   int settings_load = load_settings();
   if (settings_load != 0) {

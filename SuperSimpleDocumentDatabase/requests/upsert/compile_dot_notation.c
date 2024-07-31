@@ -9,7 +9,7 @@ int compile_dot_notation_change(sdb_http_response_t* http_response,
   sdb_stater_t* stater_doc_exists = calloc(1, sizeof(sdb_stater_t));
   stater_doc_exists->error_body = "Document does not exist";
   stater_doc_exists->error_status = 404;
-  if (!fs_file_access_sync(http_response, db_path, stater_doc_exists, F_OK)) {
+  if (!fs_file_access(http_response, db_path, stater_doc_exists, F_OK)) {
     return 1;
   }
 
@@ -17,7 +17,7 @@ int compile_dot_notation_change(sdb_http_response_t* http_response,
   sdb_stater_t* stater_read_access = calloc(1, sizeof(sdb_stater_t));
   stater_read_access->error_body = "Document does not have read permissions";
   stater_read_access->error_status = 500;
-  if (!fs_file_access_sync(http_response, db_path, stater_read_access, R_OK)) {
+  if (!fs_file_access(http_response, db_path, stater_read_access, R_OK)) {
     return 1;
   }
 
